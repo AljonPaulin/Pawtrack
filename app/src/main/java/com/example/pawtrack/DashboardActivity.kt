@@ -101,7 +101,7 @@ class DashboardActivity : ComponentActivity() {
                     bottomBar = {
                         Button(
                             onClick = {
-                                val intent = Intent(context, DashboardActivity::class.java)
+                                val intent = Intent(context, AddCatActivity::class.java)
                                 context.startActivity(intent)
                             },
                             colors = ButtonDefaults.buttonColors(

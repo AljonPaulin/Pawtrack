@@ -3,6 +3,7 @@ package com.example.pawtrack
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
@@ -162,6 +163,8 @@ fun LoginScreen() {
             onClick = {
                 val intent = Intent(context, DashboardActivity::class.java)
                 context.startActivity(intent)
+
+                Toast.makeText(context, "Log in Successfully", Toast.LENGTH_SHORT).show()
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(red = 122, green = 188, blue = 0),

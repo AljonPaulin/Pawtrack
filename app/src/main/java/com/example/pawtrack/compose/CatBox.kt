@@ -1,5 +1,6 @@
 package com.example.pawtrack.compose
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,14 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.example.pawtrack.CatTrackActvity
+import com.example.pawtrack.DashboardActivity
 
 @Composable
 fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .width(150.dp)
@@ -31,7 +36,12 @@ fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int) 
             containerColor = Color(red = 122, green = 188, blue = 0),
         ),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        onClick = {
+            val intent = Intent(context, CatTrackActvity::class.java)
+            context.startActivity(intent)
+
+        }
 
 
     ) {
