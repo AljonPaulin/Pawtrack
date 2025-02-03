@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import com.example.pawtrack.CatTrackActvity
+import com.example.pawtrack.CatTrackActivity
 import com.example.pawtrack.DashboardActivity
 
 @Composable
@@ -38,7 +38,7 @@ fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int) 
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         onClick = {
-            val intent = Intent(context, CatTrackActvity::class.java)
+            val intent = Intent(context, CatTrackActivity::class.java)
             context.startActivity(intent)
 
         }

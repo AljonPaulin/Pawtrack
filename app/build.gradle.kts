@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.animation.core.android)
+    implementation(libs.androidx.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,4 +67,5 @@ dependencies {
     implementation (libs.logging.interceptor)
     implementation (libs.material)
     implementation (libs.androidx.ui.text.google.fonts)
+    implementation (libs.material3)
 }

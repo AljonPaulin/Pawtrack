@@ -29,7 +29,9 @@
         <activity android:name=".SigninActivity" />
         <activity android:name=".DashboardActivity" />
         <activity android:name=".AddCatActivity" />
-        <activity android:name=".CatTrackActvity" />
+        <activity android:name=".CatTrackActivity" />
+        <activity android:name=".Menu" />
+
 
     </application>
 
