@@ -1,32 +1,26 @@
 package com.example.pawtrack.compose
 
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import com.example.pawtrack.CatTrackActivity
-import com.example.pawtrack.DashboardActivity
+import androidx.navigation.NavController
 
 @Composable
-fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int) {
-    val context = LocalContext.current
+fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int, navController: NavController) {
     Card(
         modifier = Modifier
             .width(150.dp)
@@ -38,8 +32,7 @@ fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int) 
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         onClick = {
-            val intent = Intent(context, CatTrackActivity::class.java)
-            context.startActivity(intent)
+            navController.navigate(route = "CatTrack")
 
         }
 

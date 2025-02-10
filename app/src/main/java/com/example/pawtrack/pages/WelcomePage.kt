@@ -1,13 +1,11 @@
-package com.example.pawtrack.compose
+package com.example.pawtrack.pages
 
-import android.annotation.SuppressLint
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,13 +16,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,21 +33,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pawtrack.LoginActivity
+import androidx.navigation.NavController
 import com.example.pawtrack.R
-import androidx.compose.ui.text.googlefonts.GoogleFont
-import androidx.compose.ui.text.googlefonts.Font
-import com.example.pawtrack.SigninActivity
+import com.example.pawtrack.viewmodel.AuthState
+import com.example.pawtrack.viewmodel.AuthViewModel
 
-
-@SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
-fun Start() {
+fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
     var clicked by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -64,6 +58,17 @@ fun Start() {
         targetValue = if (clicked) 0f else 100f,
         animationSpec = tween(durationMillis = 1000)
     )
+    val authState = authViewModel.authState.observeAsState()
+
+    LaunchedEffect(authState.value) {
+        when(authState.value){
+            is AuthState.Authenticated -> navController.navigate("home")
+            is AuthState.Error -> Toast.makeText(context,
+                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+            else -> Unit
+
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -111,8 +116,7 @@ fun Start() {
 
             Button(
                 onClick = {
-                    val intent = Intent(context, LoginActivity::class.java)
-                    context.startActivity(intent)
+                    navController.navigate(route = "login")
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(red = 122, green = 188, blue = 0),
@@ -123,17 +127,16 @@ fun Start() {
                     .padding(bottom = 20.dp)
                     .alpha(titleAlpha),
 
-            ) {
+                ) {
                 Text("Login",
                     fontWeight = FontWeight.Bold,
 
-                )
+                    )
             }
 
             Button(
                 onClick = {
-                    val intent = Intent(context, SigninActivity::class.java)
-                    context.startActivity(intent)
+                    navController.navigate(route = "signin")
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(red = 122, green = 188, blue = 0),
@@ -153,7 +156,4 @@ fun Start() {
         }
 
     }
-
-
-
 }

@@ -1,10 +1,7 @@
-package com.example.pawtrack
+package com.example.pawtrack.pages
 
 import android.content.Intent
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,113 +43,105 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pawtrack.ui.theme.PawtrackTheme
+import androidx.navigation.NavController
+import com.example.pawtrack.R
+import com.example.pawtrack.viewmodel.AuthViewModel
 
-class AddCatActivity : ComponentActivity(){
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            PawtrackTheme {
-                val context = LocalContext.current
+@Composable
+fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+    val context = LocalContext.current
 
-                Scaffold (
-                    containerColor = Color(red = 226, green = 255, blue = 172),
-                    topBar = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 12.dp, top = 15.dp, end = 12.dp)
+    Scaffold (
+        containerColor = Color(red = 226, green = 255, blue = 172),
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, top = 15.dp, end = 12.dp)
 
-                        ){
-                            Image(
-                                painter = painterResource(id = R.drawable.paww),
-                                contentDescription = "logo",
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .align(Alignment.TopStart)
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.paww),
+                    contentDescription = "logo",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .align(Alignment.TopStart)
 
-                            )
-                            Text(
-                                text = "PawTrack",
-                                color = Color(red = 122, green = 188, blue = 0),
-                                fontSize = 40.sp,
-                                fontFamily = FontFamily.Cursive,
-                                modifier = Modifier
-                                    .padding(start = 60.dp)
+                )
+                Text(
+                    text = "PawTrack",
+                    color = Color(red = 122, green = 188, blue = 0),
+                    fontSize = 40.sp,
+                    fontFamily = FontFamily.Cursive,
+                    modifier = Modifier
+                        .padding(start = 60.dp)
 
-                            )
-                            IconButton(
-                                onClick = {
+                )
+                IconButton(
+                    onClick = {
 
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Menu,
-                                    contentDescription = "Burger Menu Icon",
-                                    tint = Color(red = 122, green = 188, blue = 0),
-                                    modifier = Modifier
-                                        .size(80.dp)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = "Burger Menu Icon",
+                        tint = Color(red = 122, green = 188, blue = 0),
+                        modifier = Modifier
+                            .size(80.dp)
 
 
-                                )
-                            }
-                        }
-                    }, bottomBar = {
-                        Row (
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
+                    )
+                }
+            }
+        }, bottomBar = {
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
 
-                        ){
-                            Button(
-                                onClick = {
-                                    val intent = Intent(context, DashboardActivity::class.java)
-                                    context.startActivity(intent)
+            ){
+                Button(
+                    onClick = {
+                        navController.navigate(route = "home")
+                        Toast.makeText(context, "Unsuccessful to Add Cat", Toast.LENGTH_SHORT).show()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(red = 122, green = 188, blue = 0),
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .width(140.dp)
+                ) {
+                    Text(text = "Cancel")
+                }
 
-                                    Toast.makeText(context, "Unsuccessful to Add Cat", Toast.LENGTH_SHORT).show()
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(red = 122, green = 188, blue = 0),
-                                    contentColor = Color.White
-                                ),
-                                modifier = Modifier
-                                    .width(140.dp)
-                            ) {
-                                Text(text = "Cancel")
-                            }
+                Spacer(modifier = Modifier.width(32.dp))
 
-                            Spacer(modifier = Modifier.width(32.dp))
-
-                            Button(
-                                onClick = {
-                                    val intent = Intent(context, DashboardActivity::class.java)
-                                    context.startActivity(intent)
-
-                                    Toast.makeText(context, "Add Cat Successfully", Toast.LENGTH_SHORT).show()
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(red = 122, green = 188, blue = 0),
-                                    contentColor = Color.White
-                                ),
-                                modifier = Modifier
-                                    .width(140.dp)
-                            ) {
-                                Text(text = "Save")
-                            }
-                        }
-                    }
-                ){ innerPadding ->
-                    AddCatField(innerPadding)
+                Button(
+                    onClick = {
+                        navController.navigate(route = "home")
+                        Toast.makeText(context, "Add Cat Successfully", Toast.LENGTH_SHORT).show()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(red = 122, green = 188, blue = 0),
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .width(140.dp)
+                ) {
+                    Text(text = "Save")
                 }
             }
         }
+    ){ innerPadding ->
+        AddCatField(innerPadding)
     }
 }
 
 @Composable
-fun AddCatField(innerPadding : PaddingValues) {
+fun AddCatField(innerPadding: PaddingValues) {
     var catName by remember { mutableStateOf("") }
     var catColor by remember { mutableStateOf("") }
     var catId by remember { mutableStateOf("") }
@@ -182,7 +171,7 @@ fun AddCatField(innerPadding : PaddingValues) {
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
 
 
-        ) {
+            ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_background),
                 contentDescription = "Cat Image",
@@ -285,5 +274,4 @@ fun AddCatField(innerPadding : PaddingValues) {
 
     }
 }
-
 

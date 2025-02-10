@@ -1,9 +1,7 @@
-package com.example.pawtrack
+package com.example.pawtrack.pages
 
 import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,12 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,33 +35,31 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.pawtrack.ui.theme.PawtrackTheme
+import androidx.navigation.NavController
+import com.example.pawtrack.viewmodel.AuthState
+import com.example.pawtrack.viewmodel.AuthViewModel
 
-
-class SigninActivity : ComponentActivity()  {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            PawtrackTheme {
-                SigninScreen()
-            }
-        }
-    }
-
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SigninScreen() {
+fun SigninPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var password_2 by remember { mutableStateOf("") }
     val sub_color = Color(red = 122, green = 188, blue = 0)
+    val authState = authViewModel.authState.observeAsState()
 
+    LaunchedEffect(authState.value) {
+        when(authState.value){
+            is AuthState.Authenticated -> navController.navigate("home")
+            is AuthState.Error -> Toast.makeText(context,
+                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+            else -> Unit
+
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -147,7 +145,7 @@ fun SigninScreen() {
                 unfocusedTextColor =  sub_color,
                 cursorColor =  sub_color
 
-                ),
+            ),
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 Text(
@@ -182,7 +180,7 @@ fun SigninScreen() {
                 unfocusedTextColor =  sub_color,
                 cursorColor =  sub_color
 
-                ),
+            ),
             visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 Text(
@@ -201,27 +199,26 @@ fun SigninScreen() {
         // Login Button
         Button(
             onClick = {
-                val intent = Intent(context, DashboardActivity::class.java)
-                context.startActivity(intent)
+                authViewModel.signin(email, password)
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(red = 122, green = 188, blue = 0),
                 contentColor = Color.White
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = authState.value != AuthState.Loading
         ) {
             Text(text = "Sign In")
         }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = {
+            navController.navigate(route = "login") },
+            colors = ButtonDefaults.textButtonColors(
+                contentColor =  Color(red = 122, green = 188, blue = 0)
+            )
+            ) {
+            Text(text = "Already have an account, Login")
+        }
     }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen()
-}
-
-
 }
