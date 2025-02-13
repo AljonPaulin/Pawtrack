@@ -2,6 +2,7 @@ package com.example.pawtrack.pages
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -23,18 +25,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,22 +57,33 @@ import com.example.pawtrack.R
 import com.example.pawtrack.compose.CatInfoBox
 import com.example.pawtrack.viewmodel.AuthState
 import com.example.pawtrack.viewmodel.AuthViewModel
+import com.example.pawtrack.viewmodel.CatViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
+fun HomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, catViewModel: CatViewModel){
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val authState = authViewModel.authState.observeAsState()
+    var isContentReady by remember { mutableStateOf(false) }
 
+    // Check ff user not Authenticated then it will go back to welcome page
     LaunchedEffect(authState.value) {
-        when(authState.value){
-            is AuthState.Unauthenticated -> navController.navigate("welcome")
-            else -> Unit
+        when (authState.value) {
+            is AuthState.Unauthenticated -> {
+                navController.navigate("welcome")
+            }
+            else -> {
+                catViewModel.run()
+                delay(2000L)
+                isContentReady = true
+            }
         }
     }
 
+    //For navigating Menu buttons
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -134,34 +153,65 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
         ) { innerPadding ->
 
-            val cats = listOf(
-                Cat(
-                    "Whiskers",
-                    "Active",
-                    imageRes = android.R.drawable.ic_menu_camera,
-                    75
-                ),
-                Cat(
-                    "Fluffy",
-                    "Resting",
-                    imageRes = android.R.drawable.ic_menu_gallery,
-                    30
-                ),
-                Cat(
-                    "Shadow",
-                    "Exploring",
-                    imageRes = android.R.drawable.ic_menu_compass,
-                    60
-                ),
-            )
-            val catChunked = cats.chunked(2)
+            if (isContentReady) {
+                ScafoldContent(innerPadding, catViewModel, navController)
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(60.dp, 60.dp),
+                        color = Color(red = 122, green = 188, blue = 0),
+                    )
+                }
+            }
+        }
+    }
+}
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(Color(red = 226, green = 255, blue = 172))
-            ) {
+@Composable
+fun ScafoldContent(innerPadding: PaddingValues, catViewModel: CatViewModel, navController: NavController){
+    val users by catViewModel.users.collectAsState(initial = emptyList())
+    val isLoading by catViewModel.isLoading.collectAsState()
+    Log.d("Previous", "Blanko $users")
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(60.dp, 60.dp),
+                color = Color(red = 122, green = 188, blue = 0),
+            )
+        }
+    } else {
+        val catChunked by remember(users) {
+            derivedStateOf {
+                users.map { user ->
+                    Cat(
+                        catName = user.catName,
+                        catColor = user.catColor,
+                        catId = user.catId,
+                        catBreed = user.catBreed,
+                        imageRes = android.R.drawable.ic_menu_camera
+                    )
+                }.chunked(2)
+            }
+        }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(Color(red = 226, green = 255, blue = 172))
+
+        ) {
+            if (catChunked.isEmpty()){
+                items(1) { _ ->
+                    EmptyList()
+                }
+            } else {
                 items(catChunked.size) { catPair ->
                     Row(
                         modifier = Modifier
@@ -174,25 +224,25 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                             val currentCat = catChunked[catPair][0]
 
-                            for (cat in cats) {
-                                if (cat.name == currentCat.name) {
+                            for (cat in users) {
+                                if (cat.catName == currentCat.catName) {
                                     CatInfoBox(
-                                        catName = cat.name,
-                                        status = cat.status,
-                                        imageRes = cat.imageRes,
-                                        meterValue = cat.meterValue,
+                                        catName = cat.catName,
+                                        catId = cat.catId,
+                                        catBreed = cat.catBreed,
+                                        imageRes = android.R.drawable.ic_menu_camera,
                                         navController = navController
-
                                     )
                                 }
                             }
                         } else {
-                            for (cat in catChunked) {
+                            Log.d("CatData", " Double $catChunked")
+                            for (cat in catChunked[catPair]) {
                                 CatInfoBox(
-                                    catName = cat[catPair].name,
-                                    status = cat[catPair].status,
-                                    imageRes = cat[catPair].imageRes,
-                                    meterValue = cat[catPair].meterValue,
+                                    catName = cat.catName,
+                                    catId = cat.catId,
+                                    catBreed = cat.catBreed,
+                                    imageRes = cat.imageRes,
                                     navController = navController
                                 )
                             }
@@ -201,10 +251,11 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     }
 
                 }
-
             }
 
+
         }
+
     }
 }
 
@@ -252,11 +303,29 @@ fun DrawerMenu(authViewModel: AuthViewModel, context: Context) {
     }
 }
 
+@Composable
+fun EmptyList(){
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center,
+
+    ){
+        Spacer(modifier = Modifier.height(200.dp))
+        Text(
+            text = "Empty List of Cats",
+            fontSize = 25.sp,
+            color = Color(red = 122, green = 188, blue = 0),
+        )
+    }
+}
+
 
 data class Cat(
-    val name: String,
-    val status: String,
+    val catName : String? = null,
+    val catColor : String? = null,
+    val catId : String? = null,
+    val catBreed : String? = null,
     val imageRes: Int,
-    val meterValue: Int
 )
 

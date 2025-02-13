@@ -1,6 +1,7 @@
 package com.example.pawtrack.pages
 
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,12 +41,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.pawtrack.R
 import com.example.pawtrack.viewmodel.AuthViewModel
+import com.example.pawtrack.viewmodel.MapViewModel
 
 @Composable
 fun CatTrackPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+    //val mapViewModel = ViewModelProvider(this)[MapViewModel::class.java]
+
     Scaffold (
         containerColor = Color(red = 226, green = 255, blue = 172),
         topBar = {
@@ -261,3 +267,8 @@ data class CurrentCat(
     val location: String,
     val status: String
 )
+
+@Composable
+fun fetchApiMap(){
+
+}

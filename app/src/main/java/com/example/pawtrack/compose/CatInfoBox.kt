@@ -20,7 +20,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 
 @Composable
-fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int, navController: NavController) {
+fun CatInfoBox(
+
+    catName : String? = null,
+    catId : String? = null,
+    catBreed : String? = null,
+    imageRes: Int,
+    navController: NavController) {
     Card(
         modifier = Modifier
             .width(150.dp)
@@ -47,15 +53,8 @@ fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int, 
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .background(if (meterValue > 50) Color.Green else Color.Red)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(fraction = meterValue / 100f)
-                        .height(8.dp)
-                        .background(Color.Blue)
-                )
-            }
+                    .background(if (20 > 50) Color.Green else Color.Red)
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -72,20 +71,33 @@ fun CatInfoBox(catName: String, status: String, imageRes: Int, meterValue: Int, 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Cat Name
-            Text(
-                text = catName,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
+            if (catName != null) {
+                Text(
+                    text = catName,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
 
-            // Status
-            Text(
-                text = status,
-                fontSize = 14.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center
-            )
+            // CatID
+            if (catId != null) {
+                Text(
+                    text = catId,
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+            }
+            // CatID
+            if (catBreed != null) {
+                Text(
+                    text = catBreed,
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

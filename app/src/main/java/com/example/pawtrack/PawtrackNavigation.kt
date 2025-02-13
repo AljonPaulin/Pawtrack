@@ -12,9 +12,11 @@ import com.example.pawtrack.pages.LoginPage
 import com.example.pawtrack.pages.SigninPage
 import com.example.pawtrack.pages.WelcomePage
 import com.example.pawtrack.viewmodel.AuthViewModel
+import com.example.pawtrack.viewmodel.CatViewModel
+import com.google.firebase.database.DatabaseReference
 
 @Composable
-fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel) {
+fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel, catViewModel: CatViewModel) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "welcome", builder = {
@@ -28,10 +30,10 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
             SigninPage(modifier, navController,authViewModel)
         }
         composable(route = "home"){
-            HomePage(modifier, navController,authViewModel)
+            HomePage(modifier, navController,authViewModel, catViewModel)
         }
         composable(route = "addCat"){
-            AddCatPage(modifier, navController,authViewModel)
+            AddCatPage(modifier, navController,authViewModel, catViewModel)
         }
         composable(route = "catTrack"){
             CatTrackPage(modifier, navController,authViewModel)

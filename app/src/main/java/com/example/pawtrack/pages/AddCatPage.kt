@@ -1,6 +1,6 @@
 package com.example.pawtrack.pages
 
-import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,11 +45,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawtrack.R
+import com.example.pawtrack.UserCat
 import com.example.pawtrack.viewmodel.AuthViewModel
+import com.example.pawtrack.viewmodel.CatViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
-    val context = LocalContext.current
+fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, catViewModel: CatViewModel) {
+    val auth : FirebaseAuth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser?.uid.toString()
 
     Scaffold (
         containerColor = Color(red = 226, green = 255, blue = 172),
@@ -95,53 +99,17 @@ fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, auth
                     )
                 }
             }
-        }, bottomBar = {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-
-            ){
-                Button(
-                    onClick = {
-                        navController.navigate(route = "home")
-                        Toast.makeText(context, "Unsuccessful to Add Cat", Toast.LENGTH_SHORT).show()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(red = 122, green = 188, blue = 0),
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .width(140.dp)
-                ) {
-                    Text(text = "Cancel")
-                }
-
-                Spacer(modifier = Modifier.width(32.dp))
-
-                Button(
-                    onClick = {
-                        navController.navigate(route = "home")
-                        Toast.makeText(context, "Add Cat Successfully", Toast.LENGTH_SHORT).show()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(red = 122, green = 188, blue = 0),
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .width(140.dp)
-                ) {
-                    Text(text = "Save")
-                }
-            }
         }
+
     ){ innerPadding ->
-        AddCatField(innerPadding)
+        AddCatField(innerPadding, navController, catViewModel, currentUser)
+
     }
 }
 
 @Composable
-fun AddCatField(innerPadding: PaddingValues) {
+fun AddCatField( innerPadding: PaddingValues, navController: NavController, catViewModel: CatViewModel, currentUser : String) {
+    val context = LocalContext.current
     var catName by remember { mutableStateOf("") }
     var catColor by remember { mutableStateOf("") }
     var catId by remember { mutableStateOf("") }
@@ -272,6 +240,52 @@ fun AddCatField(innerPadding: PaddingValues) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        Row (
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+
+        ){
+            Button(
+                onClick = {
+                    navController.navigate(route = "home")
+                    Toast.makeText(context, "Unsuccessful to Add Cat", Toast.LENGTH_SHORT).show()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(red = 122, green = 188, blue = 0),
+                    contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .width(140.dp)
+            ) {
+                Text(text = "Cancel")
+            }
+
+            Spacer(modifier = Modifier.width(42.dp))
+
+            Button(
+                onClick = {
+                     val cat = UserCat(
+                         catName  = catName,
+                        catColor = catColor,
+                        catId= catId,
+                        catBreed = catBreed
+                    )
+                    catViewModel.addCat(cat, currentUser)
+                    navController.navigate(route = "home")
+                    Toast.makeText(context, "Add Cat Successfully", Toast.LENGTH_SHORT).show()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(red = 122, green = 188, blue = 0),
+                    contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .width(140.dp)
+            ) {
+                Text(text = "Save")
+            }
+        }
     }
 }
+
 
