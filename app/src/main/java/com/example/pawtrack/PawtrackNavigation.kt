@@ -7,13 +7,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pawtrack.pages.AddCatPage
 import com.example.pawtrack.pages.CatTrackPage
+import com.example.pawtrack.pages.EditCatPage
+import com.example.pawtrack.pages.FullScreenTrack
 import com.example.pawtrack.pages.HomePage
 import com.example.pawtrack.pages.LoginPage
 import com.example.pawtrack.pages.SigninPage
 import com.example.pawtrack.pages.WelcomePage
 import com.example.pawtrack.viewmodel.AuthViewModel
 import com.example.pawtrack.viewmodel.CatViewModel
-import com.google.firebase.database.DatabaseReference
 
 @Composable
 fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel, catViewModel: CatViewModel) {
@@ -35,8 +36,23 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
         composable(route = "addCat"){
             AddCatPage(modifier, navController,authViewModel, catViewModel)
         }
-        composable(route = "catTrack"){
-            CatTrackPage(modifier, navController,authViewModel)
+        composable(route = "fullScreenTrack/{catId}"){
+            val catId = it.arguments?.getString("catId")
+            if (catId != null) {
+                FullScreenTrack(modifier, navController, catId)
+            }
+        }
+        composable(route = "catTrack/{catId}"){
+            val catId = it.arguments?.getString("catId")
+            if (catId != null) {
+                CatTrackPage(modifier, navController,authViewModel, catViewModel, catId)
+            }
+        }
+        composable(route = "catTrackEdit/{catId}"){
+            val catId = it.arguments?.getString("catId")
+            if (catId != null) {
+                EditCatPage(modifier, navController,authViewModel, catViewModel, catId)
+            }
         }
 
     } )

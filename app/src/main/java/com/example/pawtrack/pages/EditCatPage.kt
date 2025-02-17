@@ -1,6 +1,5 @@
 package com.example.pawtrack.pages
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,10 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -33,11 +29,13 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,15 +47,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawtrack.R
 import com.example.pawtrack.UserCat
+import com.example.pawtrack.viewmodel.AuthState
 import com.example.pawtrack.viewmodel.AuthViewModel
 import com.example.pawtrack.viewmodel.CatViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 import com.example.pawtrack.ui.theme.Coffee
 import com.example.pawtrack.ui.theme.MainColor
 import com.example.pawtrack.ui.theme.TextSubColor
@@ -66,15 +65,27 @@ import com.example.pawtrack.ui.theme.CaramelColor
 import com.example.pawtrack.ui.theme.AlertColor
 import kotlinx.coroutines.launch
 
-
 @Composable
-fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, catViewModel: CatViewModel) {
+fun EditCatPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, catViewModel: CatViewModel, catId: String) {
     val auth : FirebaseAuth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser?.uid.toString()
+    val authState = authViewModel.authState.observeAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+
+    // Check ff user not Authenticated then it will go back to welcome page
+    LaunchedEffect(authState.value) {
+        when (authState.value) {
+            is AuthState.Unauthenticated -> {
+                navController.navigate("welcome")
+            }
+            else -> {
+                catViewModel.fetchOneCat(catId)
+            }
+        }
+    }
     //For navigating Menu buttons
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -126,24 +137,24 @@ fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, auth
                         )
                     }
                 }
-            },
+            }
 
         ){ innerPadding ->
-            AddCatField(innerPadding, navController, catViewModel, currentUser)
+            EditCatField(innerPadding, navController, catViewModel, currentUser, catId)
 
         }
-
     }
+
 
 }
 
 @Composable
-fun AddCatField( innerPadding: PaddingValues, navController: NavController, catViewModel: CatViewModel, currentUser : String) {
+fun EditCatField(innerPadding: PaddingValues, navController: NavController, catViewModel: CatViewModel, currentUser : String, catId: String) {
     val context = LocalContext.current
-    var catName by remember { mutableStateOf("") }
-    var catColor by remember { mutableStateOf("") }
-    var catId by remember { mutableStateOf("") }
-    var catBreed by remember { mutableStateOf("") }
+    val uniqueCat by catViewModel.uniqueCat.collectAsState()
+    var catName by remember { mutableStateOf(uniqueCat?.catName) }
+    var catColor by remember { mutableStateOf(uniqueCat?.catColor) }
+    var catBreed by remember { mutableStateOf(uniqueCat?.catBreed) }
     val subColor = Color(red = 122, green = 188, blue = 0)
 
     Column(
@@ -162,7 +173,7 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
                 .height(250.dp),
 
             colors = CardDefaults.cardColors(
-                contentColor = Coffee,
+                contentColor = Color(red = 226, green = 255, blue = 172),
                 containerColor = Coffee,
             ),
             shape = RoundedCornerShape(16.dp),
@@ -183,90 +194,74 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
 
         Spacer(modifier = Modifier.height(20.dp))
         // Cat Name TextField
-        OutlinedTextField(
-            value = catName,
-            onValueChange = { catName = it },
-            label = { Text("Cat Name") },
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
-                focusedLabelColor = Coffee,
-                unfocusedLabelColor = Coffee,
-                focusedIndicatorColor = Coffee,
-                unfocusedIndicatorColor = Coffee,
-                focusedTextColor =  Coffee,
-                unfocusedTextColor =  Coffee,
-                cursorColor =  Coffee
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
+        catName?.let {
+            OutlinedTextField(
+                value = it,
+                onValueChange = { catName = it },
+                label = { Text("Cat Name") },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    focusedLabelColor = Coffee,
+                    unfocusedLabelColor = Coffee,
+                    focusedIndicatorColor = Coffee,
+                    unfocusedIndicatorColor = Coffee,
+                    focusedTextColor = Coffee,
+                    unfocusedTextColor = Coffee,
+                    cursorColor = Coffee
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Cat Color TextField
-        OutlinedTextField(
-            value = catColor,
-            onValueChange = { catColor = it },
-            label = { Text("Cat Color") },
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
-                focusedLabelColor = Coffee,
-                unfocusedLabelColor = Coffee,
-                focusedIndicatorColor = Coffee,
-                unfocusedIndicatorColor = Coffee,
-                focusedTextColor =  Coffee,
-                unfocusedTextColor =  Coffee,
-                cursorColor =  Coffee
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
+        catColor?.let {
+            OutlinedTextField(
+                value = it,
+                onValueChange = { catColor = it },
+                label = { Text("Cat Color") },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    focusedLabelColor = Coffee,
+                    unfocusedLabelColor = Coffee,
+                    focusedIndicatorColor = Coffee,
+                    unfocusedIndicatorColor = Coffee,
+                    focusedTextColor = Coffee,
+                    unfocusedTextColor = Coffee,
+                    cursorColor = Coffee
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Cat Id TextField
-        OutlinedTextField(
-            value = catId,
-            onValueChange = { catId = it },
-            label = { Text("Cat ID") },
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
-                focusedLabelColor = Coffee,
-                unfocusedLabelColor = Coffee,
-                focusedIndicatorColor = Coffee,
-                unfocusedIndicatorColor = Coffee,
-                focusedTextColor =  Coffee,
-                unfocusedTextColor =  Coffee,
-                cursorColor =  Coffee
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Cat Id TextField
-        OutlinedTextField(
-            value = catBreed,
-            onValueChange = { catBreed = it },
-            label = { Text("Cat Breed") },
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent,
-                focusedLabelColor = Coffee,
-                unfocusedLabelColor = Coffee,
-                focusedIndicatorColor = Coffee,
-                unfocusedIndicatorColor = Coffee,
-                focusedTextColor =  Coffee,
-                unfocusedTextColor =  Coffee,
-                cursorColor =  Coffee
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
+        catBreed?.let {
+            OutlinedTextField(
+                value = it,
+                onValueChange = { catBreed = it },
+                label = { Text("Cat Breed") },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    focusedLabelColor = Coffee,
+                    unfocusedLabelColor = Coffee,
+                    focusedIndicatorColor = Coffee,
+                    unfocusedIndicatorColor = Coffee,
+                    focusedTextColor = Coffee,
+                    unfocusedTextColor = Coffee,
+                    cursorColor = Coffee
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -278,8 +273,8 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
         ){
             Button(
                 onClick = {
-                    navController.navigate(route = "home")
-                    Toast.makeText(context, "Unsuccessful to Add Cat", Toast.LENGTH_SHORT).show()
+                    navController.navigate("catTrack/${catId}")
+                    Toast.makeText(context, "Unsuccessful to Edit Cat", Toast.LENGTH_SHORT).show()
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Coffee,
@@ -295,15 +290,15 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
 
             Button(
                 onClick = {
-                     val cat = UserCat(
-                         catName  = catName,
+                    val cat = UserCat(
+                        catName  = catName,
                         catColor = catColor,
                         catId= catId,
                         catBreed = catBreed
                     )
-                    catViewModel.addCat(cat, currentUser)
-                    navController.navigate(route = "home")
-                    Toast.makeText(context, "Add Cat Successfully", Toast.LENGTH_SHORT).show()
+                    catViewModel.editCat(cat, currentUser, catId)
+                    navController.navigate("catTrack/${catId}")
+                    Toast.makeText(context, "Edit Cat Successfully", Toast.LENGTH_SHORT).show()
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Coffee,
@@ -317,5 +312,3 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
         }
     }
 }
-
-

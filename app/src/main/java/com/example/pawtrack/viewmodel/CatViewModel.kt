@@ -19,9 +19,13 @@ import java.util.UUID
 
 class CatViewModel : ViewModel() {
     private val database= FirebaseDatabase.getInstance().getReference("users")
+    private val auth : FirebaseAuth = FirebaseAuth.getInstance()
 
     private val _users = MutableStateFlow<List<UserCat>>(emptyList())
     val users: StateFlow<List<UserCat>> = _users
+
+    private val _uniqueCat = MutableStateFlow<UserCat?>(null)
+    val uniqueCat: StateFlow<UserCat?> = _uniqueCat
 
     var isLoading = MutableStateFlow(true)
 
@@ -35,17 +39,14 @@ class CatViewModel : ViewModel() {
 
     private suspend fun fetchUsers() {
         delay(300)
-        val auth : FirebaseAuth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser?.uid.toString()
         val shortUserId = if (currentUser.length >= 4) currentUser.substring(0, 4) else currentUser
 
         val userRef = database.child(shortUserId)
-        Log.d("Previous", "Current User : $shortUserId")
 
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(intialSnapshot: DataSnapshot) {
                 if (intialSnapshot.exists()) {
-                    Log.d("Previous", "Snapshot: $intialSnapshot")
                     val catsRef = database.child(shortUserId).child("cats")
 
                     catsRef.addValueEventListener(object : ValueEventListener {
@@ -77,6 +78,33 @@ class CatViewModel : ViewModel() {
 
 
     }
+     fun fetchOneCat(catId : String) {
+        val currentUser = auth.currentUser?.uid.toString()
+        val shortUserId = if (currentUser.length >= 4) currentUser.substring(0, 4) else currentUser
+
+        val catRef = database.child(shortUserId).child("cats").child(catId)
+        Log.d("Previous", "Current User : $shortUserId")
+
+        catRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    Log.d("Previous", "One Cat : $snapshot")
+                    val cat: UserCat? = snapshot.getValue(UserCat::class.java)
+                    if (cat != null) {
+                        _uniqueCat.value = cat
+                    }
+                } else {
+                    _uniqueCat.value = null
+                    Log.d("FirebaseCheck", "Cat ID does not exist.")
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Error: ${error.message}")
+            }
+        })
+
+
+    }
 
     fun addCat(cat : UserCat?, userId : String){
         val temp = if (userId.length >= 4) userId.substring(0, 4) else userId
@@ -98,5 +126,39 @@ class CatViewModel : ViewModel() {
                     Log.e("Firebase", "Error adding cat for user", exception)
                 }
         } ?: Log.w("Firebase","Cat object is null. Nothing to add.")
+    }
+
+    fun editCat(cat : UserCat?, userId : String, catId: String){
+        val temp = if (userId.length >= 4) userId.substring(0, 4) else userId
+        var shortUserId = temp
+        val catsRef = database.child(shortUserId).child("cats")
+
+        cat?.let {
+            val catRef = catsRef.child(catId)
+            catRef.setValue(it)
+                .addOnSuccessListener {
+                    _uniqueCat.value = cat
+                    Log.d("Firebase", "Cat edit successfully for user!")
+
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("Firebase", "Error edit cat for user", exception)
+                }
+        } ?: Log.w("Firebase","Cat object is null. Nothing to edit.")
+    }
+    fun deleteCat(catId: String) {
+        val currentUser = auth.currentUser?.uid.toString()
+        val shortUserId = if (currentUser.length >= 4) currentUser.substring(0, 4) else currentUser
+
+        val catRef = database.child(shortUserId).child("cats").child(catId)
+
+        catRef.removeValue()
+            .addOnSuccessListener {
+                Log.d("Firebase", "Cat deleted successfully for user!")
+                _users.value = _users.value.filter { it.catId != catId }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firebase", "Error deleting cat for user", exception)
+            }
     }
 }
