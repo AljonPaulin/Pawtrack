@@ -41,13 +41,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawtrack.viewmodel.AuthState
 import com.example.pawtrack.viewmodel.AuthViewModel
+import com.example.pawtrack.ui.theme.Coffee
+import com.example.pawtrack.ui.theme.MainColor
+import com.example.pawtrack.ui.theme.TextSubColor
+import com.example.pawtrack.ui.theme.AlertColor
+
 
 @Composable
 fun LoginPage(modifier: Modifier = Modifier, navController: NavController,authViewModel: AuthViewModel) {
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val sub_color = Color(red = 122, green = 188, blue = 0)
 
     val authState = authViewModel.authState.observeAsState()
 
@@ -64,14 +68,14 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController,authVi
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(red = 226, green = 255, blue = 172))
+            .background(MainColor)
             .padding(40.dp, 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "PawTrack",
-            color = Color(red = 122, green = 188, blue = 0),
+            color = Coffee,
             textAlign = TextAlign.Center,
             fontSize = 50.sp,
             fontFamily = FontFamily.Cursive,
@@ -94,13 +98,13 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController,authVi
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedLabelColor = sub_color,
-                unfocusedLabelColor = sub_color,
-                focusedIndicatorColor = sub_color,
-                unfocusedIndicatorColor = sub_color,
-                focusedTextColor =  sub_color,
-                unfocusedTextColor =  sub_color,
-                cursorColor =  sub_color
+                focusedLabelColor = Coffee,
+                unfocusedLabelColor = Coffee,
+                focusedIndicatorColor = Coffee,
+                unfocusedIndicatorColor = Coffee,
+                focusedTextColor =  Coffee,
+                unfocusedTextColor =  Coffee,
+                cursorColor =  Coffee
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -118,13 +122,13 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController,authVi
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedLabelColor = sub_color,
-                unfocusedLabelColor = sub_color,
-                focusedIndicatorColor = sub_color,
-                unfocusedIndicatorColor = sub_color,
-                focusedTextColor =  sub_color,
-                unfocusedTextColor =  sub_color,
-                cursorColor =  sub_color
+                focusedLabelColor = Coffee,
+                unfocusedLabelColor = Coffee,
+                focusedIndicatorColor = Coffee,
+                unfocusedIndicatorColor = Coffee,
+                focusedTextColor =  Coffee,
+                unfocusedTextColor =  Coffee,
+                cursorColor =  Coffee
 
             ),
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -132,7 +136,7 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController,authVi
                 Text(
                     text = if (isPasswordVisible) "HIDE" else "SHOW",
                     fontSize = 15.sp,
-                    color = sub_color,
+                    color = Coffee,
                     modifier = Modifier.padding(end = 10.dp)
                         .clickable { isPasswordVisible = !isPasswordVisible }
                 )
@@ -148,7 +152,7 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController,authVi
                 authViewModel.login(email,password)
             },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(red = 122, green = 188, blue = 0),
+                containerColor = Coffee,
                 contentColor = Color.White
             ),
             modifier = Modifier.fillMaxWidth(),
@@ -162,7 +166,7 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController,authVi
         TextButton(onClick = {
             navController.navigate(route = "signin") },
             colors = ButtonDefaults.textButtonColors(
-                contentColor =  Color(red = 122, green = 188, blue = 0)
+                contentColor =  Coffee
             )
             ) {
             Text(text = "Don't have an account, Signup")

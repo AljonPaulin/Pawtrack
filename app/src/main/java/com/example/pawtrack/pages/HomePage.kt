@@ -121,7 +121,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.paww),
+                        painter = painterResource(id = R.drawable.dog),
                         contentDescription = "logo",
                         modifier = Modifier
                             .size(50.dp)

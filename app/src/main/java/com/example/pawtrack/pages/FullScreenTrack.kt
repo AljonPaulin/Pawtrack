@@ -33,9 +33,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawtrack.R
+import com.example.pawtrack.ui.theme.Coffee
+import com.example.pawtrack.ui.theme.MainColor
+import com.example.pawtrack.ui.theme.TextSubColor
+import com.example.pawtrack.ui.theme.SubColor
+import com.example.pawtrack.ui.theme.CaramelColor
+import com.example.pawtrack.ui.theme.AlertColor
+import org.osmdroid.util.GeoPoint
 
 @Composable
-fun FullScreenTrack(modifier: Modifier = Modifier, navController: NavController, catId: String) {
+fun FullScreenTrack(modifier: Modifier = Modifier, navController: NavController, catId: String, location: GeoPoint) {
     val context = LocalContext.current
 
     Log.d("catid", "ID $catId")
@@ -50,7 +57,7 @@ fun FullScreenTrack(modifier: Modifier = Modifier, navController: NavController,
 
             ){
                 Image(
-                    painter = painterResource(id = R.drawable.paww),
+                    painter = painterResource(id = R.drawable.dog),
                     contentDescription = "logo",
                     modifier = Modifier
                         .size(50.dp)
@@ -59,7 +66,7 @@ fun FullScreenTrack(modifier: Modifier = Modifier, navController: NavController,
                 )
                 Text(
                     text = "PawTrack",
-                    color = Color(red = 122, green = 188, blue = 0),
+                    color = Coffee,
                     fontSize = 40.sp,
                     fontFamily = FontFamily.Cursive,
                     modifier = Modifier
@@ -70,6 +77,6 @@ fun FullScreenTrack(modifier: Modifier = Modifier, navController: NavController,
         }
 
     ){ innerPadding ->
-        OpenStreetMapView(context, navController, innerPadding, catId, fullScreen = true)
+        OpenStreetMapView(context, navController, innerPadding, catId, fullScreen = true, currentLocation = location)
     }
 }

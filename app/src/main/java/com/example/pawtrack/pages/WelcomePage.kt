@@ -41,6 +41,11 @@ import androidx.navigation.NavController
 import com.example.pawtrack.R
 import com.example.pawtrack.viewmodel.AuthState
 import com.example.pawtrack.viewmodel.AuthViewModel
+import com.example.pawtrack.ui.theme.Coffee
+import com.example.pawtrack.ui.theme.MainColor
+import com.example.pawtrack.ui.theme.TextSubColor
+import com.example.pawtrack.ui.theme.AlertColor
+
 
 @Composable
 fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
@@ -73,7 +78,7 @@ fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, aut
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(red = 226, green = 255, blue = 172))
+            .background(MainColor)
             .clickable {
                 clicked = true
             }
@@ -86,16 +91,16 @@ fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, aut
                 .offset(y = buttonsOffsetY.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.paww),
+                painter = painterResource(id = R.drawable.dog),
                 contentDescription = "logo",
                 modifier = Modifier
-                    .size(210.dp)
+                    .size(230.dp)
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
             )
             Text(
                 text = "PawTrack",
-                color = Color(red = 122, green = 188, blue = 0),
+                color = Coffee,
                 textAlign = TextAlign.Center,
                 fontSize = 70.sp,
                 fontFamily = FontFamily.Cursive,
@@ -119,7 +124,7 @@ fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, aut
                     navController.navigate(route = "login")
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(red = 122, green = 188, blue = 0),
+                    containerColor = Coffee,
                     contentColor = Color.White
                 ),
                 modifier = Modifier
@@ -139,7 +144,7 @@ fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, aut
                     navController.navigate(route = "signin")
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(red = 122, green = 188, blue = 0),
+                    containerColor = Coffee,
                     contentColor = Color.White
                 ),
                 modifier = Modifier

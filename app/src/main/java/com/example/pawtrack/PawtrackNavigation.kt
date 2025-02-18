@@ -15,6 +15,7 @@ import com.example.pawtrack.pages.SigninPage
 import com.example.pawtrack.pages.WelcomePage
 import com.example.pawtrack.viewmodel.AuthViewModel
 import com.example.pawtrack.viewmodel.CatViewModel
+import org.osmdroid.util.GeoPoint
 
 @Composable
 fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel, catViewModel: CatViewModel) {
@@ -36,10 +37,22 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
         composable(route = "addCat"){
             AddCatPage(modifier, navController,authViewModel, catViewModel)
         }
-        composable(route = "fullScreenTrack/{catId}"){
+        composable(route = "fullScreenTrack/{catId}/{currentLocation}"){
             val catId = it.arguments?.getString("catId")
+            val locationString = it.arguments?.getString("currentLocation")
+            var locationGeopoint: GeoPoint? = null
+
+            val location = locationString?.let { loc ->
+                val parts = loc.split(",")
+                locationGeopoint = GeoPoint(parts[0].toDouble(), parts[1].toDouble())
+            }
+
             if (catId != null) {
-                FullScreenTrack(modifier, navController, catId)
+                locationGeopoint?.let { loc ->
+                    FullScreenTrack(modifier, navController, catId,
+                        loc
+                    )
+                }
             }
         }
         composable(route = "catTrack/{catId}"){
@@ -48,6 +61,7 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
                 CatTrackPage(modifier, navController,authViewModel, catViewModel, catId)
             }
         }
+
         composable(route = "catTrackEdit/{catId}"){
             val catId = it.arguments?.getString("catId")
             if (catId != null) {

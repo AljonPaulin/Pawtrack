@@ -125,7 +125,7 @@ fun CatTrackPage(modifier: Modifier = Modifier, navController: NavController, au
 
                 ){
                     Image(
-                        painter = painterResource(id = R.drawable.paww),
+                        painter = painterResource(id = R.drawable.dog),
                         contentDescription = "logo",
                         modifier = Modifier
                             .size(50.dp)
@@ -485,7 +485,11 @@ fun OpenStreetMapView(context: Context, navController: NavController, innerPaddi
                 },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp)
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Coffee,
+                    contentColor = Color.White
+                ),
             ) {
                 Text("Back")
             }
@@ -494,12 +498,16 @@ fun OpenStreetMapView(context: Context, navController: NavController, innerPaddi
         if (!isFullScreen) {
             Button(
                 onClick = {
-                    navController.navigate(route = "fullScreenTrack/${catId}")
+                    navController.navigate(route = "fullScreenTrack/${catId}/${currentLocation}")
                     isFullScreen = true
                 },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp)
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Coffee,
+                    contentColor = Color.White
+                ),
             ) {
                 Text("FullScreen")
             }

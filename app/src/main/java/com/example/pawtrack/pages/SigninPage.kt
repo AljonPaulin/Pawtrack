@@ -40,6 +40,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawtrack.viewmodel.AuthState
 import com.example.pawtrack.viewmodel.AuthViewModel
+import com.example.pawtrack.ui.theme.Coffee
+import com.example.pawtrack.ui.theme.MainColor
+import com.example.pawtrack.ui.theme.TextSubColor
+import com.example.pawtrack.ui.theme.AlertColor
+
 
 @Composable
 fun SigninPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
@@ -48,7 +53,6 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var password_2 by remember { mutableStateOf("") }
-    val sub_color = Color(red = 122, green = 188, blue = 0)
     val authState = authViewModel.authState.observeAsState()
 
     LaunchedEffect(authState.value) {
@@ -63,14 +67,14 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(red = 226, green = 255, blue = 172))
+            .background(MainColor)
             .padding(40.dp, 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "PawTrack",
-            color = Color(red = 122, green = 188, blue = 0),
+            color = Coffee,
             textAlign = TextAlign.Center,
             fontSize = 50.sp,
             fontFamily = FontFamily.Cursive,
@@ -89,13 +93,13 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedLabelColor = sub_color,
-                unfocusedLabelColor = sub_color,
-                focusedIndicatorColor = sub_color,
-                unfocusedIndicatorColor = sub_color,
-                focusedTextColor =  sub_color,
-                unfocusedTextColor =  sub_color,
-                cursorColor =  sub_color
+                focusedLabelColor = Coffee,
+                unfocusedLabelColor = Coffee,
+                focusedIndicatorColor = Coffee,
+                unfocusedIndicatorColor = Coffee,
+                focusedTextColor =  Coffee,
+                unfocusedTextColor =  Coffee,
+                cursorColor =  Coffee
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -113,13 +117,13 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedLabelColor = sub_color,
-                unfocusedLabelColor = sub_color,
-                focusedIndicatorColor = sub_color,
-                unfocusedIndicatorColor = sub_color,
-                focusedTextColor =  sub_color,
-                unfocusedTextColor =  sub_color,
-                cursorColor =  sub_color
+                focusedLabelColor = Coffee,
+                unfocusedLabelColor = Coffee,
+                focusedIndicatorColor = Coffee,
+                unfocusedIndicatorColor = Coffee,
+                focusedTextColor =  Coffee,
+                unfocusedTextColor =  Coffee,
+                cursorColor =  Coffee
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -137,13 +141,13 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedLabelColor = sub_color,
-                unfocusedLabelColor = sub_color,
-                focusedIndicatorColor = sub_color,
-                unfocusedIndicatorColor = sub_color,
-                focusedTextColor =  sub_color,
-                unfocusedTextColor =  sub_color,
-                cursorColor =  sub_color
+                focusedLabelColor = Coffee,
+                unfocusedLabelColor = Coffee,
+                focusedIndicatorColor = Coffee,
+                unfocusedIndicatorColor = Coffee,
+                focusedTextColor =  Coffee,
+                unfocusedTextColor =  Coffee,
+                cursorColor =  Coffee
 
             ),
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -151,7 +155,7 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
                 Text(
                     text = if (isPasswordVisible) "HIDE" else "SHOW",
                     fontSize = 15.sp,
-                    color = sub_color,
+                    color = Coffee,
                     modifier = Modifier.padding(end = 10.dp)
                         .clickable { isPasswordVisible = !isPasswordVisible }
                 )
@@ -172,13 +176,14 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                focusedLabelColor = sub_color,
-                unfocusedLabelColor = sub_color,
-                focusedIndicatorColor = sub_color,
-                unfocusedIndicatorColor = sub_color,
-                focusedTextColor =  sub_color,
-                unfocusedTextColor =  sub_color,
-                cursorColor =  sub_color
+                focusedLabelColor = Coffee,
+                unfocusedLabelColor = Coffee,
+                focusedIndicatorColor = Coffee,
+                unfocusedIndicatorColor = Coffee,
+                focusedTextColor =  Coffee,
+                unfocusedTextColor =  Coffee,
+                cursorColor =  Coffee
+
 
             ),
             visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -186,7 +191,7 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
                 Text(
                     text = if (isConfirmPasswordVisible) "HIDE" else "SHOW",
                     fontSize = 15.sp,
-                    color = sub_color,
+                    color = Coffee,
                     modifier = Modifier.padding(end = 10.dp)
                         .clickable { isConfirmPasswordVisible = !isConfirmPasswordVisible }
                 )
@@ -202,7 +207,7 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
                 authViewModel.signin(email, password)
             },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(red = 122, green = 188, blue = 0),
+                containerColor = Coffee,
                 contentColor = Color.White
             ),
             modifier = Modifier.fillMaxWidth(),
@@ -215,7 +220,7 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
         TextButton(onClick = {
             navController.navigate(route = "login") },
             colors = ButtonDefaults.textButtonColors(
-                contentColor =  Color(red = 122, green = 188, blue = 0)
+                contentColor =  Coffee
             )
             ) {
             Text(text = "Already have an account, Login")

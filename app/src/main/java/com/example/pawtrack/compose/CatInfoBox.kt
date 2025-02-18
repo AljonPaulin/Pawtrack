@@ -44,7 +44,7 @@ fun CatInfoBox(
     Card(
         modifier = Modifier
             .width(150.dp)
-            .height(200.dp),
+            .height(215.dp),
         colors = CardDefaults.cardColors(
             contentColor = Color(red = 226, green = 255, blue = 172),
             containerColor = Coffee,
@@ -79,14 +79,38 @@ fun CatInfoBox(
             // Cat Name
             if (catName != null) {
                 Text(
-                    text = catName,
+                    text = catName.uppercase(),
                     fontSize = 18.sp,
                     color = MainColor,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+
+            ){
+
+                Text(
+                    text = "Device ID:",
+                    fontSize = 15.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Bold,
+                )
+                if (catId != null) {
+                    Text(
+                        text = catId,
+                        fontSize = 15.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
             Row (
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
