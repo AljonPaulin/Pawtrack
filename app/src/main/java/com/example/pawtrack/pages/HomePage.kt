@@ -70,10 +70,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawtrack.R
-import com.example.pawtrack.compose.CatInfoBox
+import com.example.pawtrack.compose.DogInfoBox
 import com.example.pawtrack.viewmodel.AuthState
 import com.example.pawtrack.viewmodel.AuthViewModel
-import com.example.pawtrack.viewmodel.CatViewModel
+import com.example.pawtrack.viewmodel.DogViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.pawtrack.ui.theme.Coffee
@@ -82,21 +82,21 @@ import com.example.pawtrack.ui.theme.TextSubColor
 import com.example.pawtrack.ui.theme.AlertColor
 
 @Composable
-fun HomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, catViewModel: CatViewModel){
+fun HomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, dogViewModel: DogViewModel){
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val authState = authViewModel.authState.observeAsState()
     var isContentReady by remember { mutableStateOf(false) }
 
-    // Check ff user not Authenticated then it will go back to welcome page
+    // Check ff user not Authentidoged then it will go back to welcome page
     LaunchedEffect(authState.value) {
         when (authState.value) {
             is AuthState.Unauthenticated -> {
                 navController.navigate("welcome")
             }
             else -> {
-                catViewModel.run()
+                dogViewModel.run()
                 delay(2000L)
                 isContentReady = true
             }
@@ -180,7 +180,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         }
                     }
                     TextButton( onClick = {
-                        navController.navigate(route = "addCat")
+                        navController.navigate(route = "addDog")
                     }) {
                         Column (
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -193,7 +193,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                                 modifier = Modifier.size(35.dp)
                             )
                             Text(
-                                text = "Add Cat",
+                                text = "Add Dog",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AlertColor)
@@ -201,6 +201,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         }
                     }
                     TextButton( onClick = {
+                        navController.navigate("store")
 
                     }) {
                         Column (
@@ -228,7 +229,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         ) { innerPadding ->
 
             if (isContentReady) {
-                    ScafoldContent(innerPadding, catViewModel, navController)
+                    ScafoldContent(innerPadding, dogViewModel, navController)
             } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -282,9 +283,9 @@ fun SearchBar() {
 }
 
 @Composable
-fun ScafoldContent(innerPadding: PaddingValues, catViewModel: CatViewModel, navController: NavController){
-    val users by catViewModel.users.collectAsState(initial = emptyList())
-    val isLoading by catViewModel.isLoading.collectAsState()
+fun ScafoldContent(innerPadding: PaddingValues, dogViewModel: DogViewModel, navController: NavController){
+    val users by dogViewModel.users.collectAsState(initial = emptyList())
+    val isLoading by dogViewModel.isLoading.collectAsState()
 
     if (isLoading) {
         Box(
@@ -297,15 +298,15 @@ fun ScafoldContent(innerPadding: PaddingValues, catViewModel: CatViewModel, navC
             )
         }
     } else {
-        val catChunked by remember(users) {
+        val dogChunked by remember(users) {
             derivedStateOf {
                 users.map { user ->
-                    Cat(
-                        catName = user.catName,
-                        catColor = user.catColor,
-                        catId = user.catId,
-                        catBreed = user.catBreed,
-                        imageRes = android.R.drawable.ic_menu_camera
+                    Dog(
+                        dogName = user.dogName,
+                        dogColor = user.dogColor,
+                        dogId = user.dogId,
+                        dogBreed = user.dogBreed,
+                        dogPic = user.dogPic
                     )
                 }.chunked(2)
             }
@@ -321,12 +322,12 @@ fun ScafoldContent(innerPadding: PaddingValues, catViewModel: CatViewModel, navC
                     .background(MainColor)
 
             ) {
-                if (catChunked.isEmpty()){
+                if (dogChunked.isEmpty()){
                     items(1) { _ ->
                         EmptyList()
                     }
                 } else {
-                    items(catChunked.size) { catPair ->
+                    items(dogChunked.size) { dogPair ->
 
                         Row(
                             modifier = Modifier
@@ -334,30 +335,30 @@ fun ScafoldContent(innerPadding: PaddingValues, catViewModel: CatViewModel, navC
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            if (catChunked[catPair].size == 1) {
+                            if (dogChunked[dogPair].size == 1) {
                                 Spacer(modifier = Modifier.weight(1f))
 
-                                val currentCat = catChunked[catPair][0]
+                                val currentDog = dogChunked[dogPair][0]
 
-                                for (cat in users) {
-                                    if (cat.catName == currentCat.catName) {
-                                        CatInfoBox(
-                                            catName = cat.catName,
-                                            catId = cat.catId,
-                                            catBreed = cat.catBreed,
-                                            imageRes = android.R.drawable.ic_menu_camera,
+                                for (dog in users) {
+                                    if (dog.dogName == currentDog.dogName) {
+                                        DogInfoBox(
+                                            dogName = dog.dogName,
+                                            dogId = dog.dogId,
+                                            dogBreed = dog.dogBreed,
+                                            dogPic = dog.dogPic,
                                             navController = navController
                                         )
                                     }
                                 }
                             } else {
-                                Log.d("CatData", " Double $catChunked")
-                                for (cat in catChunked[catPair]) {
-                                    CatInfoBox(
-                                        catName = cat.catName,
-                                        catId = cat.catId,
-                                        catBreed = cat.catBreed,
-                                        imageRes = cat.imageRes,
+                                Log.d("DogData", " Double $dogChunked")
+                                for (dog in dogChunked[dogPair]) {
+                                    DogInfoBox(
+                                        dogName = dog.dogName,
+                                        dogId = dog.dogId,
+                                        dogBreed = dog.dogBreed,
+                                        dogPic = dog.dogPic,
                                         navController = navController
                                     )
                                 }
@@ -435,7 +436,7 @@ fun EmptyList(){
     ){
         Spacer(modifier = Modifier.height(200.dp))
         Text(
-            text = "Empty List of Cats",
+            text = "Empty List of Dogs",
             fontSize = 25.sp,
             color = Color(red = 122, green = 188, blue = 0),
         )
@@ -443,11 +444,11 @@ fun EmptyList(){
 }
 
 
-data class Cat(
-    val catName : String? = null,
-    val catColor : String? = null,
-    val catId : String? = null,
-    val catBreed : String? = null,
-    val imageRes: Int,
+data class Dog(
+    val dogName : String? = null,
+    val dogColor : String? = null,
+    val dogId : String? = null,
+    val dogBreed : String? = null,
+    val dogPic: String? = null,
 )
 

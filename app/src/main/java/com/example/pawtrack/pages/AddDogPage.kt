@@ -1,7 +1,13 @@
 package com.example.pawtrack.pages
 
+import android.graphics.Bitmap
+import android.net.Uri
+import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,12 +22,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -33,10 +38,10 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,30 +50,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawtrack.R
-import com.example.pawtrack.UserCat
+import com.example.pawtrack.UserDog
 import com.example.pawtrack.viewmodel.AuthViewModel
-import com.example.pawtrack.viewmodel.CatViewModel
+import com.example.pawtrack.viewmodel.DogViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.pawtrack.ui.theme.Coffee
 import com.example.pawtrack.ui.theme.MainColor
-import com.example.pawtrack.ui.theme.TextSubColor
-import com.example.pawtrack.ui.theme.SubColor
-import com.example.pawtrack.ui.theme.CaramelColor
-import com.example.pawtrack.ui.theme.AlertColor
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, catViewModel: CatViewModel) {
+fun AddDogPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, dogViewModel: DogViewModel) {
     val auth : FirebaseAuth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser?.uid.toString()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -129,7 +129,7 @@ fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, auth
             },
 
         ){ innerPadding ->
-            AddCatField(innerPadding, navController, catViewModel, currentUser)
+            AddDogField(innerPadding, navController, dogViewModel, currentUser)
 
         }
 
@@ -137,21 +137,62 @@ fun AddCatPage(modifier: Modifier = Modifier, navController: NavController, auth
 
 }
 
+fun getFileNameFromUri(context: android.content.Context, uri: Uri): String? {
+    val cursor = context.contentResolver.query(uri, null, null, null, null)
+    cursor?.use {
+        if (it.moveToFirst()) {
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (nameIndex != -1) {
+                return it.getString(nameIndex)
+            }
+        }
+    }
+    return null
+}
+
+
 @Composable
-fun AddCatField( innerPadding: PaddingValues, navController: NavController, catViewModel: CatViewModel, currentUser : String) {
+fun AddDogField( innerPadding: PaddingValues, navController: NavController, dogViewModel: DogViewModel, currentUser : String) {
     val context = LocalContext.current
-    var catName by remember { mutableStateOf("") }
-    var catColor by remember { mutableStateOf("") }
-    var catId by remember { mutableStateOf("") }
-    var catBreed by remember { mutableStateOf("") }
-    val subColor = Color(red = 122, green = 188, blue = 0)
+    var dogName by remember { mutableStateOf("") }
+    var dogColor by remember { mutableStateOf("") }
+    var dogPic by remember { mutableStateOf("") }
+    var dogId by remember { mutableStateOf("") }
+    var dogBreed by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
+
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var latestImage by remember { mutableStateOf<Bitmap?>(null) }
+    val isFormValid = remember { mutableStateOf(false) }
+
+    // Launcher to pick image from gallery
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                dogPic = getFileNameFromUri(context, it).toString()
+                imageUri = it
+                val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+                latestImage = bitmap
+
+            }
+        }
+    )
+    // Update isFormValid whenever any field changes
+    LaunchedEffect(dogName, dogColor, dogId, dogBreed) {
+        isFormValid.value = dogName.isNotBlank() &&
+                dogColor.isNotBlank() &&
+                dogId.isNotBlank() &&
+                dogBreed.isNotBlank()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MainColor)
             .padding(innerPadding)
-            .padding(10.dp),
+            .padding(10.dp)
+            .verticalScroll(scrollState) ,
 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -170,23 +211,22 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
 
 
             ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = "Cat Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(250.dp)
-                    .background(Color.LightGray)
-
-            )
+            latestImage?.let { bitmap ->
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "Dog Image",
+                    modifier = Modifier
+                        .size(250.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        // Cat Name TextField
+        // Dog Name TextField
         OutlinedTextField(
-            value = catName,
-            onValueChange = { catName = it },
-            label = { Text("Cat Name") },
+            value = dogName,
+            onValueChange = { dogName = it },
+            label = { Text("Dog Name") },
             singleLine = true,
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
@@ -204,11 +244,11 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Cat Color TextField
+        // Dog Color TextField
         OutlinedTextField(
-            value = catColor,
-            onValueChange = { catColor = it },
-            label = { Text("Cat Color") },
+            value = dogColor,
+            onValueChange = { dogColor = it },
+            label = { Text("Dog Color") },
             singleLine = true,
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
@@ -226,11 +266,11 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Cat Id TextField
+        // Dog Id TextField
         OutlinedTextField(
-            value = catId,
-            onValueChange = { catId = it },
-            label = { Text("Cat ID") },
+            value = dogId,
+            onValueChange = { dogId = it },
+            label = { Text("Dog ID") },
             singleLine = true,
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
@@ -247,12 +287,68 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+        Row (
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            if (dogPic.isEmpty()){
+                Button(
+                    onClick = {
+                        imagePickerLauncher.launch("image/*")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Coffee,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(44.dp)
+                ) {
+                    Text(text = "Select")
+                }
+            } else{
+                Button(onClick = {
+                    imagePickerLauncher.launch("image/*")
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Coffee,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(44.dp)
+                ) {
+                    Text(text = "Selected")
+                }
+            }
 
-        // Cat Id TextField
+            Spacer(modifier = Modifier.width(8.dp))
+            // Dog Picture TextField
+            OutlinedTextField(
+                value = dogPic,
+                onValueChange = { dogPic= it },
+                label = { Text("Select Dog Picture") },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    focusedLabelColor = Coffee,
+                    unfocusedLabelColor = Coffee,
+                    focusedIndicatorColor = Coffee,
+                    unfocusedIndicatorColor = Coffee,
+                    focusedTextColor =  Coffee,
+                    unfocusedTextColor =  Coffee,
+                    cursorColor =  Coffee
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Dog Id TextField
         OutlinedTextField(
-            value = catBreed,
-            onValueChange = { catBreed = it },
-            label = { Text("Cat Breed") },
+            value = dogBreed,
+            onValueChange = { dogBreed = it },
+            label = { Text("Dog Breed") },
             singleLine = true,
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
@@ -279,7 +375,7 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
             Button(
                 onClick = {
                     navController.navigate(route = "home")
-                    Toast.makeText(context, "Unsuccessful to Add Cat", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Cancel", Toast.LENGTH_SHORT).show()
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Coffee,
@@ -295,16 +391,24 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
 
             Button(
                 onClick = {
-                     val cat = UserCat(
-                         catName  = catName,
-                        catColor = catColor,
-                        catId= catId,
-                        catBreed = catBreed
-                    )
-                    catViewModel.addCat(cat, currentUser)
-                    navController.navigate(route = "home")
-                    Toast.makeText(context, "Add Cat Successfully", Toast.LENGTH_SHORT).show()
+                    latestImage?.let { bitmap ->
+                        val filename = dogPic.substringBeforeLast(".")
+                        val savedPath = saveImageToInternalStorage(context, bitmap, filename)
+                        if (savedPath != null) {
+                            val dog = UserDog(
+                                dogName  = dogName,
+                                dogColor = dogColor,
+                                dogPic = savedPath,
+                                dogId= dogId,
+                                dogBreed = dogBreed
+                            )
+                            dogViewModel.addDog(dog, currentUser)
+                            navController.navigate(route = "home")
+                            Toast.makeText(context, "Add Dog Successfully", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 },
+                enabled = isFormValid.value,// Disable button if form is not valid
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Coffee,
                     contentColor = Color.White
@@ -317,5 +421,7 @@ fun AddCatField( innerPadding: PaddingValues, navController: NavController, catV
         }
     }
 }
+
+
 
 

@@ -1,6 +1,12 @@
 package com.example.pawtrack.pages
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -51,22 +58,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pawtrack.R
-import com.example.pawtrack.UserCat
+import com.example.pawtrack.UserDog
 import com.example.pawtrack.viewmodel.AuthState
 import com.example.pawtrack.viewmodel.AuthViewModel
-import com.example.pawtrack.viewmodel.CatViewModel
+import com.example.pawtrack.viewmodel.DogViewModel
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.delay
 import com.example.pawtrack.ui.theme.Coffee
 import com.example.pawtrack.ui.theme.MainColor
-import com.example.pawtrack.ui.theme.TextSubColor
-import com.example.pawtrack.ui.theme.SubColor
-import com.example.pawtrack.ui.theme.CaramelColor
-import com.example.pawtrack.ui.theme.AlertColor
 import kotlinx.coroutines.launch
 
 @Composable
-fun EditCatPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, catViewModel: CatViewModel, catId: String) {
+fun EditDogPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, dogViewModel: DogViewModel, dogId: String) {
     val auth : FirebaseAuth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser?.uid.toString()
     val authState = authViewModel.authState.observeAsState()
@@ -75,14 +77,14 @@ fun EditCatPage(modifier: Modifier = Modifier, navController: NavController, aut
     val context = LocalContext.current
 
 
-    // Check ff user not Authenticated then it will go back to welcome page
+    // Check ff user not Authentidoged then it will go back to welcome page
     LaunchedEffect(authState.value) {
         when (authState.value) {
             is AuthState.Unauthenticated -> {
                 navController.navigate("welcome")
             }
             else -> {
-                catViewModel.fetchOneCat(catId)
+                dogViewModel.fetchOneDog(dogId)
             }
         }
     }
@@ -140,7 +142,7 @@ fun EditCatPage(modifier: Modifier = Modifier, navController: NavController, aut
             }
 
         ){ innerPadding ->
-            EditCatField(innerPadding, navController, catViewModel, currentUser, catId)
+            EditDogField(innerPadding, navController, dogViewModel, currentUser, dogId)
 
         }
     }
@@ -149,13 +151,41 @@ fun EditCatPage(modifier: Modifier = Modifier, navController: NavController, aut
 }
 
 @Composable
-fun EditCatField(innerPadding: PaddingValues, navController: NavController, catViewModel: CatViewModel, currentUser : String, catId: String) {
+fun EditDogField(innerPadding: PaddingValues, navController: NavController, dogViewModel: DogViewModel, currentUser : String, dogId: String) {
     val context = LocalContext.current
-    val uniqueCat by catViewModel.uniqueCat.collectAsState()
-    var catName by remember { mutableStateOf(uniqueCat?.catName) }
-    var catColor by remember { mutableStateOf(uniqueCat?.catColor) }
-    var catBreed by remember { mutableStateOf(uniqueCat?.catBreed) }
-    val subColor = Color(red = 122, green = 188, blue = 0)
+    val uniqueDog by dogViewModel.uniqueDog.collectAsState()
+    var dogName by remember { mutableStateOf(uniqueDog?.dogName) }
+    var dogColor by remember { mutableStateOf(uniqueDog?.dogColor) }
+    var dogBreed by remember { mutableStateOf(uniqueDog?.dogBreed) }
+    var dogPic by remember { mutableStateOf(uniqueDog?.dogPic) }
+
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var latestImage by remember { mutableStateOf<Bitmap?>(null) }
+    var latestImagePath by remember { mutableStateOf<String?>(null) }
+
+
+
+    // Load latest image on startup
+    LaunchedEffect(Unit) {
+        latestImagePath = dogPic
+        latestImagePath?.let { path ->
+            latestImage = BitmapFactory.decodeFile(path)
+        }
+    }
+
+    // Launcher to pick image from gallery
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                dogPic = getFileNameFromUri(context, it).toString()
+                imageUri = it
+                val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+                latestImage = bitmap
+
+            }
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -181,24 +211,100 @@ fun EditCatField(innerPadding: PaddingValues, navController: NavController, catV
 
 
             ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = "Cat Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(250.dp)
-                    .background(Color.LightGray)
 
-            )
+            if (latestImage == null){
+
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_background),
+                    contentDescription = "Dog Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(250.dp)
+                        .background(Color.LightGray)
+
+                )
+
+            }else{
+                latestImage?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Dog Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(250.dp)
+                            .background(Color.LightGray)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        // Cat Name TextField
-        catName?.let {
+
+        // Dog Id TextField
+        Row (
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            if (dogPic == null){
+                Button(
+                    onClick = {
+                        imagePickerLauncher.launch("image/*")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Coffee,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(44.dp)
+                ) {
+                    Text(text = "Select Image")
+                }
+            } else{
+                Button(onClick = {
+                    imagePickerLauncher.launch("image/*")
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Coffee,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(44.dp)
+                ) {
+                    Text(text = "Selected")
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+            // Dog Picture TextField
+            dogPic?.let { it ->
+                OutlinedTextField(
+                    value = it,
+                    onValueChange = { dogPic= it },
+                    label = { Text("Selected Dog Picture") },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        focusedLabelColor = Coffee,
+                        unfocusedLabelColor = Coffee,
+                        focusedIndicatorColor = Coffee,
+                        unfocusedIndicatorColor = Coffee,
+                        focusedTextColor =  Coffee,
+                        unfocusedTextColor =  Coffee,
+                        cursorColor =  Coffee
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        // Dog Name TextField
+        dogName?.let {
             OutlinedTextField(
                 value = it,
-                onValueChange = { catName = it },
-                label = { Text("Cat Name") },
+                onValueChange = { dogName = it },
+                label = { Text("Dog Name") },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
@@ -217,12 +323,12 @@ fun EditCatField(innerPadding: PaddingValues, navController: NavController, catV
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Cat Color TextField
-        catColor?.let {
+        // Dog Color TextField
+        dogColor?.let {
             OutlinedTextField(
                 value = it,
-                onValueChange = { catColor = it },
-                label = { Text("Cat Color") },
+                onValueChange = { dogColor = it },
+                label = { Text("Dog Color") },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
@@ -241,12 +347,12 @@ fun EditCatField(innerPadding: PaddingValues, navController: NavController, catV
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Cat Id TextField
-        catBreed?.let {
+        // Dog Id TextField
+        dogBreed?.let {
             OutlinedTextField(
                 value = it,
-                onValueChange = { catBreed = it },
-                label = { Text("Cat Breed") },
+                onValueChange = { dogBreed = it },
+                label = { Text("Dog Breed") },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
@@ -273,8 +379,8 @@ fun EditCatField(innerPadding: PaddingValues, navController: NavController, catV
         ){
             Button(
                 onClick = {
-                    navController.navigate("catTrack/${catId}")
-                    Toast.makeText(context, "Unsuccessful to Edit Cat", Toast.LENGTH_SHORT).show()
+                    navController.navigate("dogTrack/${dogId}")
+                    Toast.makeText(context, "Unsuccessful to Edit Dog", Toast.LENGTH_SHORT).show()
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Coffee,
@@ -290,15 +396,48 @@ fun EditCatField(innerPadding: PaddingValues, navController: NavController, catV
 
             Button(
                 onClick = {
-                    val cat = UserCat(
-                        catName  = catName,
-                        catColor = catColor,
-                        catId= catId,
-                        catBreed = catBreed
-                    )
-                    catViewModel.editCat(cat, currentUser, catId)
-                    navController.navigate("catTrack/${catId}")
-                    Toast.makeText(context, "Edit Cat Successfully", Toast.LENGTH_SHORT).show()
+                    if (dogPic == null){
+                        val dog = UserDog(
+                            dogName  = dogName,
+                            dogColor = dogColor,
+                            dogPic = null,
+                            dogId= dogId,
+                            dogBreed = dogBreed
+                        )
+                        dogViewModel.editDog(dog, currentUser, dogId)
+                        navController.navigate("dogTrack/${dogId}")
+                        Toast.makeText(context, "Edit Dog Successfully", Toast.LENGTH_SHORT).show()
+
+                    }else{
+                        latestImage?.let { bitmap ->
+
+                            var savedPath : String
+
+                            if(dogPic?.contains("files") == true){
+                                savedPath = uniqueDog?.dogPic.toString()
+                            }else{
+                                val filename = dogPic?.substringBeforeLast(".")
+                                savedPath =
+                                    filename?.let {
+                                        saveImageToInternalStorage(context, bitmap,
+                                            it
+                                        )
+                                    }.toString()
+                            }
+                            val dog = UserDog(
+                                dogName  = dogName,
+                                dogColor = dogColor,
+                                dogPic = savedPath,
+                                dogId= dogId,
+                                dogBreed = dogBreed
+                            )
+                            dogViewModel.editDog(dog, currentUser, dogId)
+                            navController.navigate("dogTrack/${dogId}")
+                            Toast.makeText(context, "Edit Dog Successfully", Toast.LENGTH_SHORT).show()
+                    }
+
+                    }
+
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Coffee,

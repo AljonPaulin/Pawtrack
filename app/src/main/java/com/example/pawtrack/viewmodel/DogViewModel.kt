@@ -1,11 +1,9 @@
 package com.example.pawtrack.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pawtrack.UserCat
+import com.example.pawtrack.UserDog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -17,15 +15,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-class CatViewModel : ViewModel() {
+class DogViewModel : ViewModel() {
     private val database= FirebaseDatabase.getInstance().getReference("users")
     private val auth : FirebaseAuth = FirebaseAuth.getInstance()
 
-    private val _users = MutableStateFlow<List<UserCat>>(emptyList())
-    val users: StateFlow<List<UserCat>> = _users
+    private val _users = MutableStateFlow<List<UserDog>>(emptyList())
+    val users: StateFlow<List<UserDog>> = _users
 
-    private val _uniqueCat = MutableStateFlow<UserCat?>(null)
-    val uniqueCat: StateFlow<UserCat?> = _uniqueCat
+    private val _uniqueDog = MutableStateFlow<UserDog?>(null)
+    val uniqueDog: StateFlow<UserDog?> = _uniqueDog
 
     var isLoading = MutableStateFlow(true)
 
@@ -47,13 +45,13 @@ class CatViewModel : ViewModel() {
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(intialSnapshot: DataSnapshot) {
                 if (intialSnapshot.exists()) {
-                    val catsRef = database.child(shortUserId).child("cats")
+                    val dogsRef = database.child(shortUserId).child("dogs")
 
-                    catsRef.addValueEventListener(object : ValueEventListener {
+                    dogsRef.addValueEventListener(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
-                            val userList = mutableListOf<UserCat>()
+                            val userList = mutableListOf<UserDog>()
                             for (userSnapshot in snapshot.children) {
-                                val user : UserCat? = userSnapshot.getValue(UserCat::class.java)
+                                val user : UserDog? = userSnapshot.getValue(UserDog::class.java)
                                 if (user != null) {
                                     userList.add(user)
                                 }
@@ -78,24 +76,24 @@ class CatViewModel : ViewModel() {
 
 
     }
-     fun fetchOneCat(catId : String) {
+     fun fetchOneDog(dogId : String) {
         val currentUser = auth.currentUser?.uid.toString()
         val shortUserId = if (currentUser.length >= 4) currentUser.substring(0, 4) else currentUser
 
-        val catRef = database.child(shortUserId).child("cats").child(catId)
+        val dogRef = database.child(shortUserId).child("dogs").child(dogId)
         Log.d("Previous", "Current User : $shortUserId")
 
-        catRef.addValueEventListener(object : ValueEventListener {
+        dogRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    Log.d("Previous", "One Cat : $snapshot")
-                    val cat: UserCat? = snapshot.getValue(UserCat::class.java)
-                    if (cat != null) {
-                        _uniqueCat.value = cat
+                    Log.d("Previous", "One Dog : $snapshot")
+                    val dog: UserDog? = snapshot.getValue(UserDog::class.java)
+                    if (dog != null) {
+                        _uniqueDog.value = dog
                     }
                 } else {
-                    _uniqueCat.value = null
-                    Log.d("FirebaseCheck", "Cat ID does not exist.")
+                    _uniqueDog.value = null
+                    Log.d("FirebaseCheck", "Dog ID does not exist.")
                 }
             }
             override fun onCancelled(error: DatabaseError) {
@@ -106,59 +104,59 @@ class CatViewModel : ViewModel() {
 
     }
 
-    fun addCat(cat : UserCat?, userId : String){
+    fun addDog(dog : UserDog?, userId : String){
         val temp = if (userId.length >= 4) userId.substring(0, 4) else userId
         var shortUserId = temp
-        val catsRef = database.child(shortUserId).child("cats")
+        val dogsRef = database.child(shortUserId).child("dogs")
 
-        cat?.let {
-            val catId = it.catId?.ifEmpty {
+        dog?.let {
+            val dogId = it.dogId?.ifEmpty {
                 UUID.randomUUID().toString()
             }
-            val catRef = catId?.let { it1 -> catsRef.child(it1) }
-            catRef?.setValue(it)
+            val dogRef = dogId?.let { it1 -> dogsRef.child(it1) }
+            dogRef?.setValue(it)
                 ?.addOnSuccessListener {
-                    _users.value += cat
-                    Log.d("Firebase", "Cat added successfully for user!")
+                    _users.value += dog
+                    Log.d("Firebase", "Dog added successfully for user!")
 
                 }
                 ?.addOnFailureListener { exception ->
-                    Log.e("Firebase", "Error adding cat for user", exception)
+                    Log.e("Firebase", "Error adding dog for user", exception)
                 }
-        } ?: Log.w("Firebase","Cat object is null. Nothing to add.")
+        } ?: Log.w("Firebase","Dog object is null. Nothing to add.")
     }
 
-    fun editCat(cat : UserCat?, userId : String, catId: String){
+    fun editDog(dog : UserDog?, userId : String, dogId: String){
         val temp = if (userId.length >= 4) userId.substring(0, 4) else userId
         var shortUserId = temp
-        val catsRef = database.child(shortUserId).child("cats")
+        val dogsRef = database.child(shortUserId).child("dogs")
 
-        cat?.let {
-            val catRef = catsRef.child(catId)
-            catRef.setValue(it)
+        dog?.let {
+            val dogRef = dogsRef.child(dogId)
+            dogRef.setValue(it)
                 .addOnSuccessListener {
-                    _uniqueCat.value = cat
-                    Log.d("Firebase", "Cat edit successfully for user!")
+                    _uniqueDog.value = dog
+                    Log.d("Firebase", "Dog edit successfully for user!")
 
                 }
                 .addOnFailureListener { exception ->
-                    Log.e("Firebase", "Error edit cat for user", exception)
+                    Log.e("Firebase", "Error edit dog for user", exception)
                 }
-        } ?: Log.w("Firebase","Cat object is null. Nothing to edit.")
+        } ?: Log.w("Firebase","Dog object is null. Nothing to edit.")
     }
-    fun deleteCat(catId: String) {
+    fun deleteDog(dogId: String) {
         val currentUser = auth.currentUser?.uid.toString()
         val shortUserId = if (currentUser.length >= 4) currentUser.substring(0, 4) else currentUser
 
-        val catRef = database.child(shortUserId).child("cats").child(catId)
+        val dogRef = database.child(shortUserId).child("dogs").child(dogId)
 
-        catRef.removeValue()
+        dogRef.removeValue()
             .addOnSuccessListener {
-                Log.d("Firebase", "Cat deleted successfully for user!")
-                _users.value = _users.value.filter { it.catId != catId }
+                Log.d("Firebase", "Dog deleted successfully for user!")
+                _users.value = _users.value.filter { it.dogId != dogId }
             }
             .addOnFailureListener { exception ->
-                Log.e("Firebase", "Error deleting cat for user", exception)
+                Log.e("Firebase", "Error deleting dog for user", exception)
             }
     }
 }

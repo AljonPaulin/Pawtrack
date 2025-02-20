@@ -5,20 +5,21 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.pawtrack.pages.AddCatPage
-import com.example.pawtrack.pages.CatTrackPage
-import com.example.pawtrack.pages.EditCatPage
+import com.example.pawtrack.pages.AddDogPage
+import com.example.pawtrack.pages.DogTrackPage
+import com.example.pawtrack.pages.EditDogPage
 import com.example.pawtrack.pages.FullScreenTrack
 import com.example.pawtrack.pages.HomePage
 import com.example.pawtrack.pages.LoginPage
 import com.example.pawtrack.pages.SigninPage
+import com.example.pawtrack.pages.Store
 import com.example.pawtrack.pages.WelcomePage
 import com.example.pawtrack.viewmodel.AuthViewModel
-import com.example.pawtrack.viewmodel.CatViewModel
+import com.example.pawtrack.viewmodel.DogViewModel
 import org.osmdroid.util.GeoPoint
 
 @Composable
-fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel, catViewModel: CatViewModel) {
+fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel, dogViewModel: DogViewModel) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "welcome", builder = {
@@ -32,13 +33,16 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
             SigninPage(modifier, navController,authViewModel)
         }
         composable(route = "home"){
-            HomePage(modifier, navController,authViewModel, catViewModel)
+            HomePage(modifier, navController,authViewModel, dogViewModel)
         }
-        composable(route = "addCat"){
-            AddCatPage(modifier, navController,authViewModel, catViewModel)
+        composable(route = "addDog"){
+            AddDogPage(modifier, navController,authViewModel, dogViewModel)
         }
-        composable(route = "fullScreenTrack/{catId}/{currentLocation}"){
-            val catId = it.arguments?.getString("catId")
+        composable(route = "store"){
+            Store(modifier)
+        }
+        composable(route = "fullScreenTrack/{dogId}/{currentLodogion}"){
+            val dogId = it.arguments?.getString("dogId")
             val locationString = it.arguments?.getString("currentLocation")
             var locationGeopoint: GeoPoint? = null
 
@@ -47,25 +51,25 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
                 locationGeopoint = GeoPoint(parts[0].toDouble(), parts[1].toDouble())
             }
 
-            if (catId != null) {
+            if (dogId != null) {
                 locationGeopoint?.let { loc ->
-                    FullScreenTrack(modifier, navController, catId,
+                    FullScreenTrack(modifier, navController, dogId,
                         loc
                     )
                 }
             }
         }
-        composable(route = "catTrack/{catId}"){
-            val catId = it.arguments?.getString("catId")
-            if (catId != null) {
-                CatTrackPage(modifier, navController,authViewModel, catViewModel, catId)
+        composable(route = "dogTrack/{dogId}"){
+            val dogId = it.arguments?.getString("dogId")
+            if (dogId != null) {
+                DogTrackPage(modifier, navController,authViewModel, dogViewModel, dogId)
             }
         }
 
-        composable(route = "catTrackEdit/{catId}"){
-            val catId = it.arguments?.getString("catId")
-            if (catId != null) {
-                EditCatPage(modifier, navController,authViewModel, catViewModel, catId)
+        composable(route = "dogTrackEdit/{dogId}"){
+            val dogId = it.arguments?.getString("dogId")
+            if (dogId != null) {
+                EditDogPage(modifier, navController,authViewModel, dogViewModel, dogId)
             }
         }
 

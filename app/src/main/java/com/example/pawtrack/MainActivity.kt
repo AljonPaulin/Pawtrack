@@ -6,18 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import com.example.pawtrack.ui.theme.PawtrackTheme
 import com.example.pawtrack.viewmodel.AuthViewModel
-import com.example.pawtrack.viewmodel.CatViewModel
+import com.example.pawtrack.viewmodel.DogViewModel
 
  class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val authViewModel : AuthViewModel by viewModels()
-        val catViewModel : CatViewModel by viewModels()
+        val dogViewModel : DogViewModel by viewModels()
 
         setContent {
             PawtrackTheme {
-               PawtrackNavigation(authViewModel = authViewModel, catViewModel = catViewModel)
+               PawtrackNavigation(authViewModel = authViewModel, dogViewModel = dogViewModel)
             }
         }
     }

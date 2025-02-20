@@ -54,10 +54,12 @@ import androidx.navigation.NavController
 import com.example.pawtrack.R
 import com.example.pawtrack.viewmodel.AuthState
 import com.example.pawtrack.viewmodel.AuthViewModel
-import com.example.pawtrack.viewmodel.CatViewModel
+import com.example.pawtrack.viewmodel.DogViewModel
 import kotlinx.coroutines.delay
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.filled.Delete
@@ -66,6 +68,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationServices
 import org.osmdroid.config.Configuration
@@ -79,13 +82,10 @@ import kotlin.coroutines.suspendCoroutine
 import com.example.pawtrack.ui.theme.Coffee
 import com.example.pawtrack.ui.theme.MainColor
 import com.example.pawtrack.ui.theme.TextSubColor
-import com.example.pawtrack.ui.theme.SubColor
-import com.example.pawtrack.ui.theme.CaramelColor
-import com.example.pawtrack.ui.theme.AlertColor
 import kotlinx.coroutines.launch
 
 @Composable
-fun CatTrackPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel,catViewModel: CatViewModel, catId: String) {
+fun DogTrackPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel,dogViewModel: DogViewModel, dogId: String) {
     var isContentReady by remember { mutableStateOf(false) }
     val authState = authViewModel.authState.observeAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -101,7 +101,7 @@ fun CatTrackPage(modifier: Modifier = Modifier, navController: NavController, au
                 navController.navigate("welcome")
             }
             else -> {
-                catViewModel.fetchOneCat(catId)
+                dogViewModel.fetchOneDog(dogId)
                 delay(1000L)
                 isContentReady = true
             }
@@ -185,7 +185,7 @@ fun CatTrackPage(modifier: Modifier = Modifier, navController: NavController, au
 
         ){ innerPadding ->
             if (isContentReady) {
-                CatCardScreen(innerPadding, context, navController, catViewModel, catId, showDialog, { showDialog = it })
+                DogCardScreen(innerPadding, context, navController, dogViewModel, dogId, showDialog, { showDialog = it })
             } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -205,15 +205,16 @@ fun CatTrackPage(modifier: Modifier = Modifier, navController: NavController, au
 }
 
 @Composable
-fun CatCardScreen(innerPadding : PaddingValues, context: Context, navController: NavController, catViewModel: CatViewModel, catId: String, showDialog: Boolean,
+fun DogCardScreen(innerPadding : PaddingValues, context: Context, navController: NavController, dogViewModel: DogViewModel, dogId: String, showDialog: Boolean,
                   setShowDialog: (Boolean) -> Unit) {
-    val uniqueCat by catViewModel.uniqueCat.collectAsState()
-    val cat = remember {
-            CurrentCat(
-                id = uniqueCat?.catId,
-                name = uniqueCat?.catName,
-                breed = uniqueCat?.catBreed,
-                color = uniqueCat?.catColor,
+    val uniqueDog by dogViewModel.uniqueDog.collectAsState()
+    val dog = remember {
+            CurrentDog(
+                id = uniqueDog?.dogId,
+                name = uniqueDog?.dogName,
+                breed = uniqueDog?.dogBreed,
+                color = uniqueDog?.dogColor,
+                pic = uniqueDog?.dogPic,
                 location = "Living Room",
                 status = "Active"
             )
@@ -223,15 +224,15 @@ fun CatCardScreen(innerPadding : PaddingValues, context: Context, navController:
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { setShowDialog(false) },
-            title = { Text("Delete Cat") },
-            text = { Text("Are you sure you want to delete this cat? This action cannot be undone.") },
+            title = { Text("Delete Dog") },
+            text = { Text("Are you sure you want to delete this dog? This action cannot be undone.") },
             confirmButton = {
                 Button(
                     onClick = {
-                        catViewModel.deleteCat(catId)
+                        dogViewModel.deleteDog(dogId)
                         setShowDialog(false)
                         navController.navigate(route = "home")
-                        Toast.makeText(context, "Cat Deleted SuccessFully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Dog Deleted SuccessFully", Toast.LENGTH_SHORT).show()
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Red,
@@ -259,15 +260,15 @@ fun CatCardScreen(innerPadding : PaddingValues, context: Context, navController:
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(5.dp))
-        Buttons(navController, catId)
+        Buttons(navController, dogId)
 
-        CatInfoCard(cat = cat, context, navController)
+        DogInfoCard(dog = dog, context, navController)
 
     }
 }
 
 @Composable
-fun Buttons(navController: NavController, catId: String) {
+fun Buttons(navController: NavController, dogId: String) {
     val context = LocalContext.current
     Row (
         horizontalArrangement = Arrangement.Center
@@ -293,7 +294,7 @@ fun Buttons(navController: NavController, catId: String) {
         Spacer( modifier = Modifier.width(10.dp))
         Button(
             onClick = {
-                navController.navigate("catTrackEdit/${catId}")
+                navController.navigate("dogTrackEdit/${dogId}")
                 Toast.makeText(context, "Edit", Toast.LENGTH_SHORT).show()
 
             },
@@ -312,10 +313,22 @@ fun Buttons(navController: NavController, catId: String) {
 }
 
 @Composable
-fun CatInfoCard(cat: CurrentCat, context: Context, navController: NavController) {
+fun DogInfoCard(dog: CurrentDog, context: Context, navController: NavController) {
     val currentLocation = produceState<GeoPoint?>(initialValue = null) {
         value = currentLocationWithMap(context)
     }
+    var latestImage by remember { mutableStateOf<Bitmap?>(null) }
+    var latestImagePath by remember { mutableStateOf<String?>(null) }
+
+
+    // Load latest image on startup
+    LaunchedEffect(Unit) {
+        latestImagePath = dog.pic
+        latestImagePath?.let { path ->
+            latestImage = BitmapFactory.decodeFile(path)
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -338,25 +351,25 @@ fun CatInfoCard(cat: CurrentCat, context: Context, navController: NavController)
 
             ){
                 Column {
-                    // Cat Name
-                    cat.name?.let { Text(text = it, style = MaterialTheme.typography.headlineMedium) }
+                    // Dog Name
+                    dog.name?.let { Text(text = it, style = MaterialTheme.typography.headlineMedium) }
 
-                    // Cat Breed
-                    Text(text = "Breed: ${cat.breed}", style = MaterialTheme.typography.bodyLarge)
+                    // Dog Breed
+                    Text(text = "Breed: ${dog.breed}", style = MaterialTheme.typography.bodyLarge)
 
-                    // Cat Color
-                    Text(text = "Color: ${cat.color}", style = MaterialTheme.typography.bodyLarge)
+                    // Dog Color
+                    Text(text = "Color: ${dog.color}", style = MaterialTheme.typography.bodyLarge)
 
-                    // Cat ID
-                    Text(text = "ID: ${cat.id}", style = MaterialTheme.typography.bodyMedium)
+                    // Dog ID
+                    Text(text = "ID: ${dog.id}", style = MaterialTheme.typography.bodyMedium)
 
-                    // Cat Location
-                    Text(text = "Location: ${cat.location}", style = MaterialTheme.typography.bodyMedium)
+                    // Dog Location
+                    Text(text = "Location: ${dog.location}", style = MaterialTheme.typography.bodyMedium)
 
-                    // Cat Status
-                    val statusColor = if (cat.status == "Active") Color.Green else Color.Red
+                    // Dog Status
+                    val statusColor = if (dog.status == "Active") Color.Green else Color.Red
                     Text(
-                        text = "Status: ${cat.status}",
+                        text = "Status: ${dog.status}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = statusColor
                     )
@@ -376,15 +389,31 @@ fun CatInfoCard(cat: CurrentCat, context: Context, navController: NavController)
 
 
                     ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
-                        contentDescription = "Cat Image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(250.dp)
-                            .background(Color.LightGray)
+                    // Image
+                    if (latestImage == null){
 
-                    )
+                        Image(
+                            painter = painterResource(R.drawable.dog),
+                            contentDescription = "Dog Image",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(250.dp)
+                                .background(Color.LightGray)
+                        )
+
+                    }else{
+                        latestImage?.let { bitmap ->
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "Dog Image",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(250.dp)
+                                    .background(Color.LightGray)
+                            )
+                        }
+                    }
+
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -400,7 +429,7 @@ fun CatInfoCard(cat: CurrentCat, context: Context, navController: NavController)
                 shape = MaterialTheme.shapes.medium.copy(CornerSize(16.dp))
             ) {
                 currentLocation.value?.let { location ->
-                    OpenStreetMapView(context = context, navController, innerPadding = null, catId = cat.id, false, currentLocation = location )
+                    OpenStreetMapView(context = context, navController, innerPadding = null, dogId = dog.id, false, currentLocation = location )
                 }
 
             }
@@ -428,14 +457,14 @@ suspend fun currentLocationWithMap(context: Context): GeoPoint {
 }
 
 @Composable
-fun OpenStreetMapView(context: Context, navController: NavController, innerPadding: PaddingValues?, catId: String?,  fullScreen: Boolean, currentLocation: GeoPoint? = null ) {
+fun OpenStreetMapView(context: Context, navController: NavController, innerPadding: PaddingValues?, dogId: String?,  fullScreen: Boolean, currentLocation: GeoPoint? = null ) {
     var isFullScreen = fullScreen
 
 
     // Handle back button when in full screen
     BackHandler(enabled = isFullScreen) {
         isFullScreen = false
-        navController.navigate("catTrack/${catId}")
+        navController.navigate("dogTrack/${dogId}")
     }
     //Render map
     Box(modifier = Modifier.fillMaxSize()) {
@@ -481,7 +510,7 @@ fun OpenStreetMapView(context: Context, navController: NavController, innerPaddi
             Button(
                 onClick = {
                     isFullScreen = false
-                    navController.navigate("catTrack/${catId}")
+                    navController.navigate("dogTrack/${dogId}")
                 },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -498,7 +527,7 @@ fun OpenStreetMapView(context: Context, navController: NavController, innerPaddi
         if (!isFullScreen) {
             Button(
                 onClick = {
-                    navController.navigate(route = "fullScreenTrack/${catId}/${currentLocation}")
+                    navController.navigate(route = "fullScreenTrack/${dogId}/${currentLocation}")
                     isFullScreen = true
                 },
                 modifier = Modifier
@@ -515,11 +544,12 @@ fun OpenStreetMapView(context: Context, navController: NavController, innerPaddi
     }
 }
 
-data class CurrentCat(
+data class CurrentDog(
     val id: String? = null,
     val name: String? = null,
     val breed: String? = null,
     val color: String? = null,
+    val pic: String? = null,
     val location: String,
     val status: String
 )

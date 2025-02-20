@@ -1,46 +1,55 @@
 package com.example.pawtrack.compose
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.R
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import com.example.pawtrack.R
+import com.example.pawtrack.pages.getLatestImagePath
 import com.example.pawtrack.ui.theme.Coffee
 import com.example.pawtrack.ui.theme.MainColor
-import com.example.pawtrack.ui.theme.TextSubColor
-import com.example.pawtrack.ui.theme.SubColor
-import com.example.pawtrack.ui.theme.CaramelColor
 import com.example.pawtrack.ui.theme.AlertColor
 
 
 @Composable
-fun CatInfoBox(
+fun DogInfoBox(
 
-    catName : String? = null,
-    catId : String? = null,
-    catBreed : String? = null,
-    imageRes: Int,
+    dogName : String? = null,
+    dogId : String? = null,
+    dogBreed : String? = null,
+    dogPic : String? = null,
     navController: NavController) {
+
+    var latestImage by remember { mutableStateOf<Bitmap?>(null) }
+    var latestImagePath by remember { mutableStateOf<String?>(null) }
+
+
+
+    // Load latest image on startup
+    LaunchedEffect(Unit) {
+        latestImagePath = dogPic
+        latestImagePath?.let { path ->
+            latestImage = BitmapFactory.decodeFile(path)
+        }
+    }
     Card(
         modifier = Modifier
             .width(150.dp)
@@ -65,21 +74,38 @@ fun CatInfoBox(
             Spacer(modifier = Modifier.height(2.dp))
 
             // Image
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = "Cat Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(120.dp, 90.dp)
-                    .background(Color.LightGray)
-            )
+            if (latestImage == null){
+
+                Image(
+                    painter = painterResource(R.drawable.dog),
+                    contentDescription = "Dog Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(120.dp, 90.dp)
+                        .background(Color.LightGray)
+                )
+
+            }else{
+                latestImage?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Dog Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(120.dp, 90.dp)
+                            .background(Color.LightGray)
+                    )
+                }
+            }
+
+
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Cat Name
-            if (catName != null) {
+            // Dog Name
+            if (dogName != null) {
                 Text(
-                    text = catName.uppercase(),
+                    text = dogName.uppercase(),
                     fontSize = 18.sp,
                     color = MainColor,
                     fontWeight = FontWeight.Bold,
@@ -99,9 +125,9 @@ fun CatInfoBox(
                     color = Color.Gray,
                     fontWeight = FontWeight.Bold,
                 )
-                if (catId != null) {
+                if (dogId != null) {
                     Text(
-                        text = catId,
+                        text = dogId,
                         fontSize = 15.sp,
                         color = Color.Gray,
                         fontWeight = FontWeight.Bold,
@@ -125,7 +151,7 @@ fun CatInfoBox(
                 }
                 TextButton(
                     onClick = {
-                        navController.navigate("catTrack/${catId}")
+                        navController.navigate("dogTrack/${dogId}")
                     },
                     modifier = Modifier.background(AlertColor, shape = RoundedCornerShape(10.dp)).size(60.dp, 36.dp)
                 ) {
