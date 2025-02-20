@@ -42,7 +42,7 @@ import com.example.pawtrack.ui.theme.AlertColor
 import org.osmdroid.util.GeoPoint
 
 @Composable
-fun FullScreenTrack(modifier: Modifier = Modifier, navController: NavController, dogId: String, lodogion: GeoPoint) {
+fun FullScreenTrack(modifier: Modifier = Modifier, navController: NavController, dogId: String, location: GeoPoint) {
     val context = LocalContext.current
 
     Log.d("dogid", "ID $dogId")
@@ -77,6 +77,6 @@ fun FullScreenTrack(modifier: Modifier = Modifier, navController: NavController,
         }
 
     ){ innerPadding ->
-        OpenStreetMapView(context, navController, innerPadding, dogId, fullScreen = true, currentLocation = lodogion)
+        OpenStreetMapView(context, navController, innerPadding, dogId, fullScreen = true, currentLocation = location)
     }
 }

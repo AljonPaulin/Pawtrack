@@ -53,6 +53,7 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var password_2 by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf(false) }
     val authState = authViewModel.authState.observeAsState()
 
     LaunchedEffect(authState.value) {
@@ -134,8 +135,8 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
         var isPasswordVisible by remember { mutableStateOf(false) }
 
         OutlinedTextField(
-            value = password_2,
-            onValueChange = { text2 -> password_2 = text2 },
+            value = password,
+            onValueChange = { text1 -> password = text1 },
             label = { Text(text = "Password") },
             singleLine = true,
             colors = TextFieldDefaults.colors(
@@ -169,8 +170,8 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
         var isConfirmPasswordVisible by remember { mutableStateOf(false) }
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { text2 -> password = text2 },
+            value = password_2,
+            onValueChange = { text2 -> password_2 = text2 },
             label = { Text(text = "Confirm Password") },
             singleLine = true,
             colors = TextFieldDefaults.colors(
@@ -204,7 +205,12 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
         // Login Button
         Button(
             onClick = {
-                authViewModel.signin(email, password)
+                if (password != password_2) {
+                    passwordError = true
+                } else {
+                    passwordError = false
+                    authViewModel.signin(name, email, password)
+                }
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Coffee,
@@ -224,6 +230,9 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
             )
             ) {
             Text(text = "Already have an account, Login")
+        }
+        if (passwordError) {
+            Toast.makeText(context, "Password does not match", Toast.LENGTH_SHORT).show()
         }
     }
 }

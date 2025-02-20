@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.pawtrack.pages.AccountPage
 import com.example.pawtrack.pages.AddDogPage
 import com.example.pawtrack.pages.DogTrackPage
 import com.example.pawtrack.pages.EditDogPage
@@ -24,11 +25,14 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
 
     NavHost(navController = navController, startDestination = "welcome", builder = {
         composable(route = "welcome"){
-            WelcomePage(modifier, navController,authViewModel)
+            WelcomePage(modifier, navController ,authViewModel)
         }
         composable(route = "login"){
-           LoginPage(modifier, navController,authViewModel)
+           LoginPage(modifier, navController ,authViewModel)
        }
+        composable(route = "account"){
+            AccountPage(modifier, navController ,authViewModel,)
+        }
         composable(route = "signin"){
             SigninPage(modifier, navController,authViewModel)
         }
@@ -41,12 +45,12 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
         composable(route = "store"){
             Store(modifier)
         }
-        composable(route = "fullScreenTrack/{dogId}/{currentLodogion}"){
+        composable(route = "fullScreenTrack/{dogId}/{currentLocation}"){
             val dogId = it.arguments?.getString("dogId")
             val locationString = it.arguments?.getString("currentLocation")
             var locationGeopoint: GeoPoint? = null
 
-            val location = locationString?.let { loc ->
+            locationString?.let { loc ->
                 val parts = loc.split(",")
                 locationGeopoint = GeoPoint(parts[0].toDouble(), parts[1].toDouble())
             }
