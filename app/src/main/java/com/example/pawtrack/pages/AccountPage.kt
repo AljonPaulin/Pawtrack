@@ -385,7 +385,7 @@ fun ContentAccountPage( innerPadding: PaddingValues, authViewModel: AuthViewMode
 @Composable
 fun AccountDetailRow(label: String, value: String, isEditing: Boolean, onValueChange: (String) -> Unit) {
     Column(
-        modifier = Modifier.width(if (isEditing) 350.dp else 280.dp),
+        modifier = Modifier.width(if (isEditing) 350.dp else 230.dp),
         horizontalAlignment = Alignment.Start
     ) {
         Text(text = label, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = if (isEditing) Coffee else Color.Black)

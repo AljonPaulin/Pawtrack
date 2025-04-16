@@ -183,7 +183,8 @@ fun AddDogField( innerPadding: PaddingValues, navController: NavController, dogV
         isFormValid.value = dogName.isNotBlank() &&
                 dogColor.isNotBlank() &&
                 dogId.isNotBlank() &&
-                dogBreed.isNotBlank()
+                dogBreed.isNotBlank() &&
+                dogPic.isNotBlank()
     }
 
     Column(

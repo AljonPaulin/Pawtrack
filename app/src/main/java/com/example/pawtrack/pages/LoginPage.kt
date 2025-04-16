@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultShadowColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -79,6 +80,14 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController,authVi
             textAlign = TextAlign.Center,
             fontSize = 50.sp,
             fontFamily = FontFamily.Cursive,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        Text(
+            text = "Log your account to start tracking your dog activities",
+            color = Coffee,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .fillMaxWidth()
         )

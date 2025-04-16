@@ -1,6 +1,7 @@
 [versions]
 agp = "8.8.0"
 converterGson = "2.9.0"
+firebaseBom = "33.12.0"
 foundation = "1.7.8"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -38,6 +39,8 @@ androidx-foundation = { module = "androidx.compose.foundation:foundation", versi
 androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "runtime" }
 androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

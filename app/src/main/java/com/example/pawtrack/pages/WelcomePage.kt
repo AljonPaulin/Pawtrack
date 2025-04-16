@@ -29,12 +29,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -51,16 +56,27 @@ import com.example.pawtrack.ui.theme.AlertColor
 fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
     var clicked by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val image = ImageBitmap.imageResource(id = R.drawable.dogmain)
+
 
     // Animation to fade in the title
     val titleAlpha by animateFloatAsState(
         targetValue = if (clicked) 1f else 0f,
         animationSpec = tween(durationMillis = 1000)
     )
+    val buttonAlpha by animateFloatAsState(
+        targetValue = if (clicked) 0f else 1f,
+        animationSpec = tween(durationMillis = 500)
+    )
 
     // Animation to move buttons up when clicked
     val buttonsOffsetY by animateFloatAsState(
         targetValue = if (clicked) 0f else 100f,
+        animationSpec = tween(durationMillis = 1000)
+    )
+    // Animation to move buttons up when clicked
+    val startButtonsOffsetY by animateFloatAsState(
+        targetValue = if (clicked) 70f else 50f,
         animationSpec = tween(durationMillis = 1000)
     )
     val authState = authViewModel.authState.observeAsState()
@@ -78,35 +94,75 @@ fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, aut
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MainColor)
-            .clickable {
-                clicked = true
+            .drawBehind {
+                val customWidth = 2200
+                val customHeight = (size.height * 1.1f).toInt()
+
+                drawImage(
+                    image = image,
+                    dstSize = IntSize(customWidth, customHeight),
+                    dstOffset = IntOffset(
+                        ((size.width - customWidth) / 2).toInt(),  // center horizontally
+                        ((size.height - customHeight) / 2).toInt() // center vertically
+                    )
+                    )
             }
+            .background(color = Color.Black.copy(alpha = 0.6f))
 
     ){
         Column(
             modifier= Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 80.dp)
+                .padding(top = 290.dp)
                 .offset(y = buttonsOffsetY.dp)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.dog),
-                contentDescription = "logo",
-                modifier = Modifier
-                    .size(230.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-            )
             Text(
                 text = "PawTrack",
-                color = Coffee,
+                color = Color.White,
                 textAlign = TextAlign.Center,
                 fontSize = 70.sp,
                 fontFamily = FontFamily.Cursive,
                 modifier = Modifier
                     .fillMaxWidth()
             )
+            Text(
+                text = "Welcome to the world of dog tracking!",
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+                    .alpha(buttonAlpha),
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+
+                ){
+                Button(
+                    onClick = {
+                        clicked = true
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Coffee,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .width(320.dp)
+                        .padding(bottom = 20.dp)
+                        .alpha(buttonAlpha),
+                    enabled = !clicked
+                ) {
+                    Text("Get Started",
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
         }
         Column(
             modifier = Modifier
@@ -131,6 +187,7 @@ fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, aut
                     .width(240.dp)
                     .padding(bottom = 20.dp)
                     .alpha(titleAlpha),
+                enabled = clicked
 
                 ) {
                 Text("Login",
@@ -149,7 +206,8 @@ fun WelcomePage(modifier: Modifier = Modifier, navController: NavController, aut
                 ),
                 modifier = Modifier
                     .width(240.dp)
-                    .alpha(titleAlpha)
+                    .alpha(titleAlpha),
+                enabled = clicked
 
             ) {
                 Text(

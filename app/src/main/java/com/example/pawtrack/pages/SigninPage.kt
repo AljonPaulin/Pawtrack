@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -44,6 +46,7 @@ import com.example.pawtrack.ui.theme.Coffee
 import com.example.pawtrack.ui.theme.MainColor
 import com.example.pawtrack.ui.theme.TextSubColor
 import com.example.pawtrack.ui.theme.AlertColor
+import com.example.pawtrack.ui.theme.CaramelColor
 
 
 @Composable
@@ -51,6 +54,7 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var password_2 by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf(false) }
@@ -83,9 +87,18 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
                 .fillMaxWidth()
         )
 
+        Text(
+            text = "Create your account to start tracking your dog activities",
+            color = Coffee,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Email TextField
+        // Name TextField
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
@@ -106,6 +119,7 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -114,6 +128,35 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
+            ),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent,
+                focusedLabelColor = Coffee,
+                unfocusedLabelColor = Coffee,
+                focusedIndicatorColor = Coffee,
+                unfocusedIndicatorColor = Coffee,
+                focusedTextColor =  Coffee,
+                unfocusedTextColor =  Coffee,
+                cursorColor =  Coffee
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Phone TextField
+        OutlinedTextField(
+            value = phone,
+            onValueChange = {
+                // Accept only digits
+                if (it.all { char -> char.isDigit() }) {
+                    phone = it
+                } },
+            label = { Text("Phone Number") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number
             ),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
