@@ -1,11 +1,25 @@
 package com.example.pawtrack.viewmodel
 
+import android.app.Activity
+import android.content.ContentValues.TAG
+import android.content.Context
+import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.FirebaseException
+import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.userProfileChangeRequest
+import java.util.concurrent.TimeUnit
 
 class AuthViewModel : ViewModel() {
 
@@ -47,6 +61,8 @@ class AuthViewModel : ViewModel() {
                 }
             }
     }
+
+
 
     fun updateUserProfileName(newName: String) {
         val user = auth.currentUser

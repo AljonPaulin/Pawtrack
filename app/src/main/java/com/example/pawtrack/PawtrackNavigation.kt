@@ -10,10 +10,13 @@ import com.example.pawtrack.pages.AddDogPage
 import com.example.pawtrack.pages.DogTrackPage
 import com.example.pawtrack.pages.EditDogPage
 import com.example.pawtrack.pages.FullScreenTrack
+import com.example.pawtrack.pages.HelpPage
+import com.example.pawtrack.pages.HistoryPage
 import com.example.pawtrack.pages.HomePage
 import com.example.pawtrack.pages.LoginPage
 import com.example.pawtrack.pages.SigninPage
 import com.example.pawtrack.pages.Store
+import com.example.pawtrack.pages.VerifyPage
 import com.example.pawtrack.pages.WelcomePage
 import com.example.pawtrack.viewmodel.AuthViewModel
 import com.example.pawtrack.viewmodel.DogViewModel
@@ -36,11 +39,20 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
         composable(route = "signin"){
             SigninPage(modifier, navController,authViewModel)
         }
+        composable(route = "verify"){
+            VerifyPage(modifier, navController,authViewModel)
+        }
+        composable(route = "help"){
+            HelpPage(modifier, navController,authViewModel)
+        }
         composable(route = "home"){
             HomePage(modifier, navController,authViewModel, dogViewModel)
         }
         composable(route = "addDog"){
             AddDogPage(modifier, navController,authViewModel, dogViewModel)
+        }
+        composable(route = "history"){
+            HistoryPage(modifier, navController,authViewModel, dogViewModel)
         }
         composable(route = "store"){
             Store(modifier)

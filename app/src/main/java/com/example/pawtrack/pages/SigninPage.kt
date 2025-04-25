@@ -1,6 +1,9 @@
 package com.example.pawtrack.pages
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,10 +50,22 @@ import com.example.pawtrack.ui.theme.MainColor
 import com.example.pawtrack.ui.theme.TextSubColor
 import com.example.pawtrack.ui.theme.AlertColor
 import com.example.pawtrack.ui.theme.CaramelColor
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseException
+import com.google.firebase.FirebaseTooManyRequestsException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.auth
+import java.util.concurrent.TimeUnit
 
 
 @Composable
 fun SigninPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+    val auth : FirebaseAuth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -248,12 +263,14 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
         // Login Button
         Button(
             onClick = {
-                if (password != password_2) {
+                navController.navigate(route = "verify")
+                otp(phone, auth, context)
+                /*if (password != password_2) {
                     passwordError = true
                 } else {
                     passwordError = false
                     authViewModel.signin(name, email, password)
-                }
+                }*/
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Coffee,
@@ -279,3 +296,31 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
         }
     }
 }
+
+
+fun otp(phone : String, auth: FirebaseAuth, context: Context){
+    val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+            Log.d("PhoneAuth", "Verification completed: ${credential.smsCode}")
+        }
+
+        override fun onVerificationFailed(e: FirebaseException) {
+            Log.e("PhoneAuth", "Verification failed: ${e.message}")
+        }
+
+        override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
+            Log.d("PhoneAuth", "Code sent to user. ID: $verificationId")
+        }
+    }
+
+    val options = PhoneAuthOptions.newBuilder(auth)
+        .setPhoneNumber("+63$phone") // Phone number to verify
+        .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
+        .setActivity(context as Activity) // Activity (for callback binding)
+        .setCallbacks(callbacks)
+        .build()
+    Log.d("PhoneAuth", "Options: $options")
+    PhoneAuthProvider.verifyPhoneNumber(options)
+
+}
+

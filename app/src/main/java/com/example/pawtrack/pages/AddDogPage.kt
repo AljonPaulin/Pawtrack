@@ -79,7 +79,7 @@ fun AddDogPage(modifier: Modifier = Modifier, navController: NavController, auth
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            DrawerMenu(authViewModel, context)
+            DrawerMenu(authViewModel, context, navController)
         }
     ) {
         Scaffold (

@@ -71,6 +71,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -85,6 +86,7 @@ import com.example.pawtrack.ui.theme.Coffee
 import com.example.pawtrack.ui.theme.MainColor
 import com.example.pawtrack.ui.theme.TextSubColor
 import com.example.pawtrack.ui.theme.AlertColor
+
 
 @Composable
 fun HomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, dogViewModel: DogViewModel){
@@ -112,7 +114,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            DrawerMenu(authViewModel, context)
+            DrawerMenu(authViewModel, context, navController)
         }
     ) {
 
@@ -461,7 +463,7 @@ fun ScafoldContent(innerPadding: PaddingValues, dogViewModel: DogViewModel, navC
 }
 
 @Composable
-fun DrawerMenu(authViewModel: AuthViewModel, context: Context) {
+fun DrawerMenu(authViewModel: AuthViewModel, context: Context, navController: NavController) {
 
     CompositionLocalProvider(LocalContentColor provides Coffee) {
         Column(
@@ -489,13 +491,13 @@ fun DrawerMenu(authViewModel: AuthViewModel, context: Context) {
             Text(
                 text = "History",
                 fontSize = 20.sp,
-                modifier = Modifier.clickable { /* Handle Click */ }
+                modifier = Modifier.clickable { navController.navigate(route = "history") }
             )
             Spacer(modifier = Modifier.height(8.dp)) // Adds space between items
             Text(
                 text = "Help",
                 fontSize = 20.sp,
-                modifier = Modifier.clickable { /* Handle Click */ }
+                modifier = Modifier.clickable {  navController.navigate(route = "help") }
             )
 
         }

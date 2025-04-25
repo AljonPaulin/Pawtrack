@@ -14,9 +14,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/pawtrack_launcher"
+        android:icon="@mipmap/paw_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/pawtrack_launcher_round"
+        android:roundIcon="@mipmap/paw_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Pawtrack"
         tools:targetApi="31">

@@ -40,6 +40,7 @@ fun DogInfoBox(
 
     var latestImage by remember { mutableStateOf<Bitmap?>(null) }
     var latestImagePath by remember { mutableStateOf<String?>(null) }
+    var isConnected by remember { mutableStateOf(false) }
 
 
 
@@ -53,7 +54,7 @@ fun DogInfoBox(
     Card(
         modifier = Modifier
             .width(150.dp)
-            .height(215.dp),
+            .height(if (isConnected) 215.dp else 260.dp),
         colors = CardDefaults.cardColors(
             contentColor = Color(red = 226, green = 255, blue = 172),
             containerColor = Coffee,
@@ -142,12 +143,14 @@ fun DogInfoBox(
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
                 TextButton(
-                    onClick = {},
-                    modifier = Modifier.background(MainColor, shape = RoundedCornerShape(10.dp)).size(60.dp, 36.dp)
+                    onClick = {
+                        isConnected = false
+                    },
+                    modifier = Modifier.background(if (isConnected) MainColor else AlertColor, shape = RoundedCornerShape(10.dp)).size(69.dp, 36.dp)
                 ) {
-                    Text("Active",
+                    Text(if (isConnected) "Active" else "Inactive",
                         fontSize = 12.sp,
-                        color = Coffee)
+                        color = if (isConnected) Coffee else Color.White)
                 }
                 TextButton(
                     onClick = {
@@ -160,6 +163,18 @@ fun DogInfoBox(
                         color = Color.White)
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(
+                onClick = {
+                    isConnected = true
+                },
+                modifier = Modifier.background(AlertColor, shape = RoundedCornerShape(10.dp)).size(80.dp, 36.dp)
+            ) {
+                Text("Connect",
+                    fontSize = 12.sp,
+                    color = Color.White)
+            }
+
 
 
         }

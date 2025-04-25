@@ -114,7 +114,7 @@ fun DogTrackPage(modifier: Modifier = Modifier, navController: NavController, au
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            DrawerMenu(authViewModel, context)
+            DrawerMenu(authViewModel, context , navController)
         }
     ) {
         Scaffold (
