@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -65,7 +66,6 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 fun SigninPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
-    val auth : FirebaseAuth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -215,7 +215,8 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
                     text = if (isPasswordVisible) "HIDE" else "SHOW",
                     fontSize = 15.sp,
                     color = Coffee,
-                    modifier = Modifier.padding(end = 10.dp)
+                    modifier = Modifier
+                        .padding(end = 10.dp)
                         .clickable { isPasswordVisible = !isPasswordVisible }
                 )
             },
@@ -251,7 +252,8 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
                     text = if (isConfirmPasswordVisible) "HIDE" else "SHOW",
                     fontSize = 15.sp,
                     color = Coffee,
-                    modifier = Modifier.padding(end = 10.dp)
+                    modifier = Modifier
+                        .padding(end = 10.dp)
                         .clickable { isConfirmPasswordVisible = !isConfirmPasswordVisible }
                 )
             },
@@ -260,17 +262,24 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Login Button
+        // Sign Button
         Button(
             onClick = {
-                navController.navigate(route = "verify")
-                otp(phone, auth, context)
-                /*if (password != password_2) {
+                if(password != password_2) {
                     passwordError = true
                 } else {
                     passwordError = false
-                    authViewModel.signin(name, email, password)
-                }*/
+                    if (phone.startsWith("0")){
+                        val temp = phone.drop(1)
+                        val fullPhone = "+63${temp}"
+                        val randomCode = (1000..9999).random().toString()
+                        authViewModel.pendingName = name
+                        authViewModel.pendingEmail = email
+                        authViewModel.pendingPassword = password
+                        authViewModel.pendingPhone = phone
+                        navController.navigate(route = "verify/${fullPhone}/${randomCode}")
+                    }
+                }
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Coffee,
@@ -297,7 +306,7 @@ fun SigninPage(modifier: Modifier = Modifier, navController: NavController, auth
     }
 }
 
-
+//Failure Code
 fun otp(phone : String, auth: FirebaseAuth, context: Context){
     val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
         override fun onVerificationCompleted(credential: PhoneAuthCredential) {

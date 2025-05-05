@@ -44,7 +44,7 @@ import com.example.pawtrack.ui.theme.CaramelColor
 
 
 @Composable
-fun VerifyPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+fun VerifyPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, code: String) {
     val context = LocalContext.current
     var otp by remember { mutableStateOf("") }
     var otpError by remember { mutableStateOf(false) }
@@ -120,12 +120,20 @@ fun VerifyPage(modifier: Modifier = Modifier, navController: NavController, auth
         // Verify Button
         Button(
             onClick = {
-                /*if (password != password_2) {
+                if (otp != code) {
                     otpError = true
                 } else {
                     otpError = false
-                    authViewModel.signin(name, email, password)
-                }*/
+                    authViewModel.pendingName?.let { name ->
+                        authViewModel.pendingEmail?.let { email ->
+                            authViewModel.pendingPassword?.let { password ->
+                                authViewModel.pendingPhone?.let { phone ->
+                                    authViewModel.signin(name, email, password, phone)
+                                }
+                            }
+                        }
+                    }
+                }
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Coffee,

@@ -377,46 +377,50 @@ fun DogInfoCard(dog: CurrentDog, context: Context, navController: NavController)
                     )
                 }
                 Spacer(modifier = Modifier.width(30.dp))
-                Card(
-                    modifier = Modifier
-                        .width(130.dp)
-                        .height(130.dp),
+                Column {
+                    Card(
+                        modifier = Modifier
+                            .width(130.dp)
+                            .height(100.dp),
 
-                    colors = CardDefaults.cardColors(
-                        contentColor = Color(red = 226, green = 255, blue = 172),
-                        containerColor = Color(red = 122, green = 188, blue = 0),
-                    ),
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        colors = CardDefaults.cardColors(
+                            contentColor = Color(red = 226, green = 255, blue = 172),
+                            containerColor = Color(red = 122, green = 188, blue = 0),
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
 
 
-                    ) {
-                    // Image
-                    if (latestImage == null){
+                        ) {
+                        // Image
+                        if (latestImage == null){
 
-                        Image(
-                            painter = painterResource(R.drawable.dog),
-                            contentDescription = "Dog Image",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(250.dp)
-                                .background(Color.LightGray)
-                        )
-
-                    }else{
-                        latestImage?.let { bitmap ->
                             Image(
-                                bitmap = bitmap.asImageBitmap(),
+                                painter = painterResource(R.drawable.dog),
                                 contentDescription = "Dog Image",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(250.dp)
                                     .background(Color.LightGray)
                             )
+
+                        }else{
+                            latestImage?.let { bitmap ->
+                                Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = "Dog Image",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(250.dp)
+                                        .background(Color.LightGray)
+                                )
+                            }
                         }
                     }
+                    //HISTORY BUTTON
 
                 }
+
             }
             Spacer(modifier = Modifier.height(16.dp))
 

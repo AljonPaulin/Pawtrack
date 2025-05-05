@@ -2,6 +2,9 @@ package com.example.pawtrack.pages
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.telephony.SmsManager
+import android.telephony.SubscriptionManager
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -334,7 +337,8 @@ fun AlertBar() {
                 verticalAlignment = Alignment.CenterVertically,
             ){
                 TextButton(
-                    onClick = {},
+                    onClick = {
+                  },
                     modifier = Modifier.background(AlertColor, shape = RoundedCornerShape(10.dp))
                         .size(60.dp, 36.dp)
                 ) {
@@ -392,6 +396,7 @@ fun ScafoldContent(innerPadding: PaddingValues, dogViewModel: DogViewModel, navC
             modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)) {
+
             SearchBar()
             AlertBar()
             LazyColumn(

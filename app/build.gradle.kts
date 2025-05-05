@@ -69,7 +69,7 @@ dependencies {
     //androidTestImplementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    //androidTestImplementation (libs.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.okhttp3)
@@ -84,4 +84,6 @@ dependencies {
     implementation (libs.ui)
     implementation (libs.androidx.foundation)
     implementation (libs.androidx.runtime)
+    androidTestImplementation (libs.androidx.ui.test.junit4.v180)
+    debugImplementation (libs.ui.test.manifest)
 }

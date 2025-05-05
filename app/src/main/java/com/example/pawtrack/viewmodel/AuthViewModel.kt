@@ -19,13 +19,19 @@ import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.database.FirebaseDatabase
 import java.util.concurrent.TimeUnit
 
 class AuthViewModel : ViewModel() {
 
+    private val database = FirebaseDatabase.getInstance().getReference("client")
     private val auth : FirebaseAuth = FirebaseAuth.getInstance()
     private val _authState = MutableLiveData<AuthState>()
     val authState : LiveData<AuthState> = _authState
+    var pendingName: String? = null
+    var pendingEmail: String? = null
+    var pendingPassword: String? = null
+    var pendingPhone: String? = null
 
     init {
         checkAuthStatus()
@@ -86,9 +92,9 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-    fun signin(name : String, email : String, password : String){
-        if(email.isEmpty() || password.isEmpty() || name.isEmpty()){
-            _authState.value = AuthState.Error("Name or Email or Password can't be empty")
+    fun signin(name : String, email : String, password : String, phone: String){
+        if(email.isEmpty() || password.isEmpty() || name.isEmpty() || phone.isEmpty()){
+            _authState.value = AuthState.Error("Name or Email or Password or Number can't be empty")
             return
         }
         _authState.value = AuthState.Loading
@@ -102,7 +108,20 @@ class AuthViewModel : ViewModel() {
                     user?.updateProfile(profileUpdates)
                         ?.addOnCompleteListener { updateTask ->
                             if (updateTask.isSuccessful) {
-                                _authState.value = AuthState.Authenticated
+                                // Save extra user data like phone number to Firestore
+                                val userInfo = hashMapOf(
+                                    "uid" to user.uid,
+                                    "name" to name,
+                                    "email" to email,
+                                    "phone" to phone
+                                )
+                                database.child(user.uid).setValue(userInfo)
+                                    .addOnSuccessListener {
+                                        _authState.value = AuthState.Authenticated
+                                    }
+                                    .addOnFailureListener { e ->
+                                        _authState.value = AuthState.Error("Failed to save user data: ${e.message}")
+                                    }
                             } else {
                                 _authState.value = AuthState.Error(updateTask.exception?.message ?: "Failed to update profile")
                             }

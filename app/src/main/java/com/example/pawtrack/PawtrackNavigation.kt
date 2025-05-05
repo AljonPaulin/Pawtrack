@@ -1,5 +1,6 @@
 package com.example.pawtrack
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -23,7 +24,10 @@ import com.example.pawtrack.viewmodel.DogViewModel
 import org.osmdroid.util.GeoPoint
 
 @Composable
-fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewModel, dogViewModel: DogViewModel) {
+fun PawtrackNavigation(
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel, dogViewModel: DogViewModel, onSendSms: (String, String) -> Unit
+) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "welcome", builder = {
@@ -39,8 +43,15 @@ fun PawtrackNavigation(modifier: Modifier = Modifier,authViewModel: AuthViewMode
         composable(route = "signin"){
             SigninPage(modifier, navController,authViewModel)
         }
-        composable(route = "verify"){
-            VerifyPage(modifier, navController,authViewModel)
+        composable(route = "verify/{fullPhone}/{randomCode}"){
+            val fullPhone = it.arguments?.getString("fullPhone")
+            val randomCode = it.arguments?.getString("randomCode")
+            if (fullPhone != null) {
+                if (randomCode != null) {
+                    onSendSms(fullPhone, randomCode)
+                    VerifyPage(modifier, navController,authViewModel, randomCode)
+                }
+            }
         }
         composable(route = "help"){
             HelpPage(modifier, navController,authViewModel)
